@@ -781,7 +781,7 @@ const Auth = (() => {
               // --- AGE VERIFICATION GATE ---
               // Check if age was verified in the last 30 days. If not, show the gate.
               // UID exceptions: players who can't use face detection (beard/mask/medical)
-              const AGE_GATE_EXCEPTIONS = ["eCBIxfK7HyblFbFNHDVXcOZIRD42"];
+              const AGE_GATE_EXCEPTIONS = ["eCBIxfK7HyblFbFNHDVXcOZIRD42", "VBeRg8uy0AfB7EPt9KuytpsBHmb2"];
               const ageVerified = isAgeVerified(user.uid);
               const ageGateExempt = AGE_GATE_EXCEPTIONS.includes(user.uid);
               if (!ageVerified && !ageGateExempt) {

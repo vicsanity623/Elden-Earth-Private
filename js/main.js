@@ -2797,6 +2797,77 @@
     buyLandBtn?.addEventListener("click", enterBuyLandMode);
     exitBuyBtn?.addEventListener("click", exitBuyLandMode);
 
+    // --- Territory Location Pill (reverse geocode during Buy Land mode) ---
+    const territoryPill = el("territory-pill");
+    const territoryText = el("territory-text");
+    let territoryTimer = null;
+    let lastTerritoryQuery = "";
+
+    async function updateTerritory() {
+      if (!map || !document.body.classList.contains("buy-mode")) return;
+      try {
+        const center = map.getCenter();
+        const lat = center.lat;
+        const lon = center.lng;
+
+        // Throttle: don't query the same location twice within 10 seconds
+        const locKey = `${lat.toFixed(4)},${lon.toFixed(4)}`;
+        if (locKey === lastTerritoryQuery) return;
+        lastTerritoryQuery = locKey;
+
+        // Nominatim reverse geocoding (free, no API key)
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
+          headers: { "Accept-Language": "en" }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const addr = data.address || {};
+
+        const city = addr.city || addr.town || addr.village || addr.hamlet || addr.municipality || "";
+        const state = addr.state || addr.county || "";
+        const country = addr.country_code ? addr.country_code.toUpperCase() : "";
+
+        let display = "";
+        if (city && state) display = `${city}, ${state}`;
+        else if (city) display = city;
+        else if (state) display = state;
+        else if (data.display_name) {
+          // Fallback: take first 2 parts of display_name
+          const parts = data.display_name.split(",").map(s => s.trim());
+          display = parts.slice(0, 2).join(", ");
+        } else {
+          display = "Unknown Territory";
+        }
+
+        if (country) display += ` ${country}`;
+
+        if (territoryText) territoryText.textContent = `📍 ${display}`;
+      } catch (e) {
+        console.warn("[Territory] Reverse geocode failed:", e);
+      }
+    }
+
+    function startTerritoryUpdates() {
+      if (territoryPill) territoryPill.classList.remove("hidden");
+      updateTerritory();
+      territoryTimer = setInterval(updateTerritory, 8000); // Update every 8 seconds while panning
+    }
+
+    function stopTerritoryUpdates() {
+      if (territoryPill) territoryPill.classList.add("hidden");
+      if (territoryTimer) { clearInterval(territoryTimer); territoryTimer = null; }
+      lastTerritoryQuery = "";
+    }
+
+    // Patch buy mode functions to include territory updates
+    const _origEnterBuy = enterBuyLandMode;
+    const _origExitBuy = exitBuyLandMode;
+    // (already wired above — add territory to the button listeners)
+    buyLandBtn?.removeEventListener("click", enterBuyLandMode);
+    exitBuyBtn?.removeEventListener("click", exitBuyLandMode);
+    buyLandBtn?.addEventListener("click", () => { _origEnterBuy(); startTerritoryUpdates(); });
+    exitBuyBtn?.addEventListener("click", () => { _origExitBuy(); stopTerritoryUpdates(); });
+
     // Reset Camera to True North & Default Zoom Level
     el("recenter-btn")?.addEventListener("click", () => {
       if (currentPos && map) {
