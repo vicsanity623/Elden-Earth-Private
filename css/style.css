@@ -3733,7 +3733,7 @@ body.buy-mode #treasury-ad-container {
 .side-hud-stack {
   position: fixed;
   left: 14px;
-  top: 375px;
+  top: 300px;
   bottom: 80px;
   z-index: 22;
   display: flex;

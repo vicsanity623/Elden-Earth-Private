@@ -29,9 +29,14 @@ const Auth = (() => {
     try {
       if (typeof firebase !== "undefined" && firebase.functions) {
         const checkWhitelist = firebase.functions().httpsCallable("checkWhitelist");
-        const result = await checkWhitelist({ email: emailLower });
+        const result = await Promise.race([
+          checkWhitelist({ email: emailLower }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 8000))
+        ]);
         console.log(`[Auth] Cloud Function result:`, result.data);
         return result.data.allowed === true;
+      } else {
+        console.warn("[Auth] Firebase Functions SDK not available");
       }
     } catch (e) {
       console.warn("[Auth] Cloud Function check failed:", e.message);
