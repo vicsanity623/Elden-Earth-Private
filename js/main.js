@@ -142,6 +142,9 @@
 
   function showToast(msg, ms = 2200) {
     const t = el("toast");
+    if (!t) return;
+    // Move to end of body so it always paints ABOVE modals (DOM order matters)
+    document.body.appendChild(t);
     t.textContent = msg;
     t.classList.remove("hidden");
     clearTimeout(toastTimer);
@@ -1492,6 +1495,7 @@
     if (typeof WeeklyPool !== "undefined") WeeklyPool.init();
     startIncomeLoop();
     wireUI();
+    initLandlordPill();
 
     // --- Battery Saver & Background Sleep Controller (0% Battery in Pocket) ---
     document.addEventListener("visibilitychange", () => {
@@ -1570,6 +1574,105 @@
 
       updateTopbar();
     }, 1000);
+  }
+
+  // --- Landlord Title Pill (cycles Mayor / Governor / President) ---
+  let landlordTimer = null;
+  let landlordIndex = 0;
+  const LANDLORD_CYCLE_MS = 6000; // 6 seconds per title
+
+  function initLandlordPill() {
+    const pill = el("landlord-pill");
+    if (!pill) return;
+    updateLandlordPill();
+    landlordTimer = setInterval(updateLandlordPill, LANDLORD_CYCLE_MS);
+  }
+
+  async function updateLandlordPill() {
+    const pill = el("landlord-pill");
+    const titleEl = el("landlord-title");
+    const nameEl = el("landlord-name");
+    const locEl = el("landlord-location");
+    const avatarEl = el("landlord-avatar");
+    if (!pill || !titleEl || !nameEl || !locEl) return;
+
+    const titles = ["mayor", "governor", "president"];
+    const title = titles[landlordIndex % titles.length];
+    landlordIndex++;
+
+    try {
+      // Ensure leaderboard data is loaded
+      if (typeof Leaderboard !== "undefined" && Leaderboard.fetchRankings) {
+        await Leaderboard.fetchRankings();
+      }
+
+      // Get local territory from player's plots
+      if (typeof Leaderboard === "undefined" || !Leaderboard.getLocalTerritoryRulers) {
+        pill.classList.add("hidden");
+        return;
+      }
+
+      // Get territory info from the player's own plots
+      const allPlots = (typeof Grid !== "undefined" && Grid.getAllPlots) ? Grid.getAllPlots() : {};
+      const state = Store.get();
+      const myId = state?.player?.id;
+      let myCity = "", myState = "", myCountry = "";
+      for (const tid in allPlots) {
+        const p = allPlots[tid];
+        if (p.ownerId === myId) {
+          if (p.city) myCity = p.city;
+          if (p.state) myState = p.state;
+          if (p.country) myCountry = p.country;
+          break;
+        }
+      }
+
+      if (!myCity && !myState && !myCountry) {
+        pill.classList.add("hidden");
+        return;
+      }
+
+      const rulers = Leaderboard.getLocalTerritoryRulers(myCity, myState, myCountry);
+      const ruler = rulers[title]; // mayor, governor, or president
+
+      locEl.textContent = title === "mayor"
+        ? `YOU ARE IN ${myCity.toUpperCase()}`
+        : title === "governor"
+          ? `YOU ARE IN ${myState.toUpperCase()}`
+          : `YOU ARE IN ${myCountry.toUpperCase()}`;
+
+      titleEl.textContent = title.toUpperCase();
+
+      if (!ruler) {
+        nameEl.textContent = "No ruler yet";
+        avatarEl.innerHTML = "👤";
+        pill.classList.remove("hidden");
+        return;
+      }
+
+      nameEl.textContent = ruler.name || "Unknown";
+
+      // Get avatar from the ruler's plots
+      let rulerAvatar = "👤";
+      for (const tid in allPlots) {
+        const p = allPlots[tid];
+        if (p.ownerId === ruler.ownerId && p.avatar) {
+          rulerAvatar = p.avatar;
+          break;
+        }
+      }
+
+      if (rulerAvatar.startsWith("img:")) {
+        avatarEl.innerHTML = `<img src="${rulerAvatar.slice(4)}" alt="">`;
+      } else {
+        avatarEl.textContent = rulerAvatar;
+      }
+
+      pill.classList.remove("hidden");
+    } catch (e) {
+      console.warn("[LandlordPill] Error:", e);
+      pill.classList.add("hidden");
+    }
   }
 
   // ---------------- UI wiring ----------------
