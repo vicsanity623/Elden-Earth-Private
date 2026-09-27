@@ -61,8 +61,23 @@ const Auth = (() => {
       console.warn("[Auth] Legacy server unreachable:", e.message);
     }
 
-    // 3. All servers unreachable — deny access
-    console.warn(`[Auth] ACCESS DENIED: ${emailLower} — all checks failed`);
+    // 3. Local fallback: if Cloud Function is unreachable, allow known whitelisted emails
+    // Prevents total lockout during server outages or network issues
+    const LOCAL_WHITELIST = [
+      "vicsanity623@gmail.com",
+      "davinci8587@gmail.com",
+      "ja1070133@gmail.com",
+      "zeno.minsohn@gmail.com",
+      "sajc9498@gmail.com",
+    ];
+    const localMatch = LOCAL_WHITELIST.some(e => e.toLowerCase().trim() === emailLower);
+    if (localMatch) {
+      console.warn(`[Auth] Cloud Function unreachable — using local whitelist for: ${emailLower}`);
+      return true;
+    }
+
+    // 4. All checks failed -- deny access
+    console.warn(`[Auth] ACCESS DENIED: ${emailLower} — Cloud Function failed and not on local list`);
     return false;
   }
 
