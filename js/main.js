@@ -1593,7 +1593,6 @@
     const titleEl = el("landlord-ruler-title");
     const locEl = el("landlord-ruler-location");
     const rulerAvatarEl = el("landlord-ruler-avatar");
-    const playerAvatarEl = el("landlord-ruler-player");
     if (!pill || !titleEl || !locEl) return;
 
     const titles = ["mayor", "governor", "president"];
@@ -1666,14 +1665,6 @@
         }
       } else {
         rulerAvatarEl.innerHTML = "👤";
-      }
-
-      // Set player avatar (small circle)
-      const myAvatar = state?.player?.avatar || "🙂";
-      if (myAvatar.startsWith("img:")) {
-        playerAvatarEl.innerHTML = `<img src="${myAvatar.slice(4)}" alt="">`;
-      } else {
-        playerAvatarEl.textContent = myAvatar;
       }
 
       pill.classList.remove("hidden");

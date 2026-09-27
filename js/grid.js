@@ -904,12 +904,7 @@ const Grid = (() => {
               <div class="orbit-ring ring-1"></div>
               <div class="orbit-ring ring-2"></div>
               <div class="beacon-core-gem">
-                <svg viewBox="0 0 32 38" class="beacon-svg">
-                  <polygon points="16,2 29,12 16,16 3,12" fill="#ff6b81"></polygon>
-                  <polygon points="3,12 16,16 16,36" fill="#8b0000"></polygon>
-                  <polygon points="29,12 16,16 16,36" fill="#ff1744"></polygon>
-                  <polygon points="16,2 20,8 16,16 12,8" fill="#ffffff"></polygon>
-                </svg>
+                <img src="assets/mine-extractor.png" class="beacon-img" alt="Extractor">
               </div>
             </div>
           `;

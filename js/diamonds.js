@@ -89,7 +89,7 @@ const Diamonds = (() => {
       el.innerHTML = `
         <div class="gem-anchor">
           <div class="gem-3d static-crystal">
-            <img src="assets/mine-extractor.png" class="gem-img" alt="diamond">
+            <img src="assets/diamond-spawn.png" class="gem-img" alt="diamond">
           </div>
         </div>
       `;
@@ -102,7 +102,7 @@ const Diamonds = (() => {
         <div class="gem-anchor" style="--hover-dur:${randomDuration}; --hover-delay:${randomDelay};">
           <div class="gem-shadow"></div>
           <div class="gem-3d">
-            <img src="assets/mine-extractor.png" class="gem-img" alt="diamond">
+            <img src="assets/diamond-spawn.png" class="gem-img" alt="diamond">
             <div class="gem-sparkle-1">✦</div>
           </div>
         </div>

@@ -2904,6 +2904,13 @@ html,body{
   display: block;
 }
 
+.beacon-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+}
+
 /* Orbital Energy Rings — STATIC until the player taps the extractor */
 .orbit-ring {
   position: absolute;
@@ -3448,52 +3455,30 @@ html,body{
   border-radius: 50%;
 }
 
-.landlord-ruler-player {
-  position: absolute;
-  bottom: 49px;
-  left: 19px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1.5px solid var(--gold);
-  background: var(--ink-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  overflow: hidden;
-}
-
-.landlord-ruler-player img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
 .landlord-ruler-title {
   position: absolute;
-  top: 110px;
-  left: 22px;
+  top: 96px;
+  left: 21px;
   right: 6px;
   font-family: var(--font-display, 'Cinzel', serif);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.9px;
   text-transform: uppercase;
   color: var(--gold);
-  text-align: center;
+  text-align: left;
 }
 
 .landlord-ruler-location {
   position: absolute;
-  bottom: 14px;
-  left: 10px;
+  bottom: 18px;
+  left: 15px;
   right: 6px;
-  font-size: 9.0px;
-  font-weight: 900;
+  font-size: 9.9px;
+  font-weight: 700;
   color: var(--parchment);
   text-align: center;
+  text-transform: lowercase;
   white-space: nowrap;
   overflow: hidden;
 }
