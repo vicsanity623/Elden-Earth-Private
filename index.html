@@ -371,7 +371,10 @@
   </button>
 
   <!-- Unified Side HUD Stack (Extractor + Leaderboard + Calendar) -->
-  <div class="side-hud-stack">
+  <div class="side-hud-stack" id="side-hud-stack">
+    <button class="side-hud-collapse-btn" id="side-hud-collapse" aria-label="Toggle HUD stack">
+      <span class="collapse-icon">◀</span>
+    </button>
     <!-- Diamond Extractor Quick Button -->
     <button id="extractor-hud-btn" class="side-hud-btn extractor-btn hidden" aria-label="Diamond Extractor">
       <div id="extractor-unread-dot" class="calendar-red-dot hidden"></div>

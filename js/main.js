@@ -1676,6 +1676,15 @@
 
   // ---------------- UI wiring ----------------
   function wireUI() {
+    // --- Side HUD Stack Collapse Toggle ---
+    const collapseBtn = el("side-hud-collapse");
+    const hudStack = el("side-hud-stack");
+    if (collapseBtn && hudStack) {
+      collapseBtn.addEventListener("click", () => {
+        hudStack.classList.toggle("collapsed");
+      });
+    }
+
     window.addEventListener("openPlayerInfo", (e) => {       const cluster = e.detail?.cluster;       updatePlayerInfoModal(cluster ? cluster[0] : null);       openModal("player-info-modal");     });
 
     // --- Flying 3D Gem Arc Particle to HUD ---
