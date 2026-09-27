@@ -1590,11 +1590,11 @@
 
   async function updateLandlordPill() {
     const pill = el("landlord-pill");
-    const titleEl = el("landlord-title");
-    const nameEl = el("landlord-name");
-    const locEl = el("landlord-location");
-    const avatarEl = el("landlord-avatar");
-    if (!pill || !titleEl || !nameEl || !locEl) return;
+    const titleEl = el("landlord-ruler-title");
+    const locEl = el("landlord-ruler-location");
+    const rulerAvatarEl = el("landlord-ruler-avatar");
+    const playerAvatarEl = el("landlord-ruler-player");
+    if (!pill || !titleEl || !locEl) return;
 
     const titles = ["mayor", "governor", "president"];
     const title = titles[landlordIndex % titles.length];
@@ -1606,7 +1606,6 @@
         await Leaderboard.fetchRankings();
       }
 
-      // Get local territory from player's plots
       if (typeof Leaderboard === "undefined" || !Leaderboard.getLocalTerritoryRulers) {
         pill.classList.add("hidden");
         return;
@@ -1633,39 +1632,48 @@
       }
 
       const rulers = Leaderboard.getLocalTerritoryRulers(myCity, myState, myCountry);
-      const ruler = rulers[title]; // mayor, governor, or president
+      const ruler = rulers[title];
 
       locEl.textContent = title === "mayor"
-        ? `YOU ARE IN ${myCity.toUpperCase()}`
+        ? `IN ${myCity.toUpperCase()}`
         : title === "governor"
-          ? `YOU ARE IN ${myState.toUpperCase()}`
-          : `YOU ARE IN ${myCountry.toUpperCase()}`;
+          ? `IN ${myState.toUpperCase()}`
+          : `IN ${myCountry.toUpperCase()}`;
+
+      // Trigger marquee scroll if text overflows
+      locEl.classList.remove("marquee-active");
+      void locEl.offsetWidth; // force reflow
+      if (locEl.scrollWidth > locEl.clientWidth) {
+        locEl.classList.add("marquee-active");
+      }
 
       titleEl.textContent = title.toUpperCase();
 
-      if (!ruler) {
-        nameEl.textContent = "No ruler yet";
-        avatarEl.innerHTML = "👤";
-        pill.classList.remove("hidden");
-        return;
-      }
-
-      nameEl.textContent = ruler.name || "Unknown";
-
-      // Get avatar from the ruler's plots
-      let rulerAvatar = "👤";
-      for (const tid in allPlots) {
-        const p = allPlots[tid];
-        if (p.ownerId === ruler.ownerId && p.avatar) {
-          rulerAvatar = p.avatar;
-          break;
+      // Set ruler avatar (large circle)
+      if (ruler) {
+        let rulerAvatar = "👤";
+        for (const tid in allPlots) {
+          const p = allPlots[tid];
+          if (p.ownerId === ruler.ownerId && p.avatar) {
+            rulerAvatar = p.avatar;
+            break;
+          }
         }
+        if (rulerAvatar.startsWith("img:")) {
+          rulerAvatarEl.innerHTML = `<img src="${rulerAvatar.slice(4)}" alt="">`;
+        } else {
+          rulerAvatarEl.textContent = rulerAvatar;
+        }
+      } else {
+        rulerAvatarEl.innerHTML = "👤";
       }
 
-      if (rulerAvatar.startsWith("img:")) {
-        avatarEl.innerHTML = `<img src="${rulerAvatar.slice(4)}" alt="">`;
+      // Set player avatar (small circle)
+      const myAvatar = state?.player?.avatar || "🙂";
+      if (myAvatar.startsWith("img:")) {
+        playerAvatarEl.innerHTML = `<img src="${myAvatar.slice(4)}" alt="">`;
       } else {
-        avatarEl.textContent = rulerAvatar;
+        playerAvatarEl.textContent = myAvatar;
       }
 
       pill.classList.remove("hidden");
