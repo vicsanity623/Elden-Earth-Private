@@ -282,7 +282,7 @@
     <div class="hero-balance-card" id="hero-balance-card">
       <div class="hero-top-line">
         <div class="hero-brand-title">
-          <span class="hero-brand-gem">◆</span> ELDEN EARTH <span class="hero-version-tag">0.1.10.85b</span>
+          <span class="hero-brand-gem">◆</span> ELDEN EARTH <span class="hero-version-tag">0.1.10.86b</span>
         </div>
         <div id="boost-timer-badge" class="boost-timer-badge hidden">⚡ 30X BOOST <span id="boost-countdown">00:00:00</span></div>
       </div>
@@ -337,44 +337,12 @@
   <!-- Toast -->
   <div id="toast" class="toast hidden"></div>
 
-  <!-- Weekly Realm Treasury Pool HUD Button (Floats above +2 EB button) -->
-  <button id="weekly-pool-hud-btn" class="weekly-pool-btn" aria-label="Weekly Dividend Pool">
-    <div class="pool-btn-inner">
-      <span class="pool-icon">👑</span>
-      <div class="pool-btn-text">
-        <span class="pool-tag">1% POOL</span>
-        <span class="pool-sub" id="hud-pool-countdown">MON 00:00</span>
-      </div>
-    </div>
-  </button>
-
-  <!-- Landlord Title Pill (Cycles Mayor / Governor / President) -->
-  <div id="landlord-pill" class="landlord-pill hidden">
-    <div class="landlord-ruler-bg">
-      <img src="assets/ruler.png" alt="" class="landlord-ruler-img">
-      <div class="landlord-ruler-avatar" id="landlord-ruler-avatar">👤</div>
-      <div class="landlord-ruler-title" id="landlord-ruler-title">MAYOR</div>
-      <div class="landlord-ruler-location" id="landlord-ruler-location">IN ---</div>
-    </div>
-  </div>
-
-  <!-- Floating +2 EB Boost Button -->
-  <button id="boost-btn" class="boost-btn hidden">
-    <span class="boost-icon">⚡</span>
-    <span class="boost-text">+2 <span class="eb-coin-icon"></span></span>
-  </button>
-
-  <!-- Permanent 30X/50X Multiplier Button -->
-  <button id="multiplier-btn" class="multiplier-btn">
-    <span class="mult-tag" id="mult-label">30X</span>
-    <span class="mult-sub">BOOST</span>
-  </button>
-
-  <!-- Unified Side HUD Stack (Extractor + Leaderboard + Calendar) -->
+  <!-- Unified Side HUD Stack (All buttons in one collapsible stack) -->
   <div class="side-hud-stack" id="side-hud-stack">
     <button class="side-hud-collapse-btn" id="side-hud-collapse" aria-label="Toggle HUD stack">
       <span class="collapse-icon">◀</span>
     </button>
+
     <!-- Diamond Extractor Quick Button -->
     <button id="extractor-hud-btn" class="side-hud-btn extractor-btn hidden" aria-label="Diamond Extractor">
       <div id="extractor-unread-dot" class="calendar-red-dot hidden"></div>
@@ -409,6 +377,40 @@
       </div>
       <span class="side-hud-subtext">Pet:🍓 <span id="pet-berry-count">0</span></span>
     </button>
+
+    <!-- Weekly Pool Button (moved into stack) -->
+    <button id="weekly-pool-hud-btn" class="side-hud-btn weekly-pool-btn" aria-label="Weekly Dividend Pool">
+      <div class="side-hud-card custom-hud-card pool-card">
+        <span class="pool-icon">👑</span>
+      </div>
+      <span class="side-hud-subtext" id="hud-pool-countdown">POOL 0D</span>
+    </button>
+
+    <!-- +2 EB Boost Button (moved into stack) -->
+    <button id="boost-btn" class="side-hud-btn boost-btn-stack hidden" aria-label="Boost">
+      <div class="side-hud-card custom-hud-card boost-card">
+        <span class="boost-icon">⚡</span>
+      </div>
+      <span class="side-hud-subtext">+2 EB</span>
+    </button>
+
+    <!-- 30X/50X Multiplier Button (moved into stack) -->
+    <button id="multiplier-btn" class="side-hud-btn multiplier-btn-stack" aria-label="Multiplier Boost">
+      <div class="side-hud-card custom-hud-card mult-card">
+        <span class="mult-tag" id="mult-label">30X</span>
+      </div>
+      <span class="side-hud-subtext">BOOST</span>
+    </button>
+  </div>
+
+  <!-- Landlord Title Pill (Cycles Mayor / Governor / President) -->
+  <div id="landlord-pill" class="landlord-pill hidden">
+    <div class="landlord-ruler-bg">
+      <img src="assets/ruler.png" alt="" class="landlord-ruler-img">
+      <div class="landlord-ruler-avatar" id="landlord-ruler-avatar">👤</div>
+      <div class="landlord-ruler-title" id="landlord-ruler-title">MAYOR</div>
+      <div class="landlord-ruler-location" id="landlord-ruler-location">IN ---</div>
+    </div>
   </div>
 
   <!-- Feed + permanent View hub row (hub collapses to 👁 VIEW) -->
