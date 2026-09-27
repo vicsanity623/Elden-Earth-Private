@@ -375,13 +375,8 @@
     <!-- Diamond Extractor Quick Button -->
     <button id="extractor-hud-btn" class="side-hud-btn extractor-btn hidden" aria-label="Diamond Extractor">
       <div id="extractor-unread-dot" class="calendar-red-dot hidden"></div>
-      <div class="side-hud-card extractor-hud-card">
-        <svg viewBox="0 0 32 38" class="extractor-hud-svg">
-          <polygon points="16,2 29,12 16,16 3,12" fill="#ff6b81"/>
-          <polygon points="3,12 16,16 16,36" fill="#8b0000"/>
-          <polygon points="29,12 16,16 16,36" fill="#ff1744"/>
-          <polygon points="16,2 20,8 16,16 12,8" fill="#ffffff"/>
-        </svg>
+      <div class="side-hud-card custom-hud-card">
+        <img src="assets/mine-extractor.png" alt="Mine" class="custom-hud-img">
       </div>
       <span class="side-hud-subtext">Mine</span>
     </button>
@@ -397,17 +392,15 @@
     <!-- Daily Login Calendar Button -->
     <button id="calendar-btn" class="side-hud-btn calendar-btn" aria-label="Daily Calendar">
       <div id="calendar-unread-dot" class="calendar-red-dot hidden"></div>
-      <div class="side-hud-card calendar-icon-card">
-        <div class="cal-card-top" id="cal-hud-month">SEP</div>
-        <div class="cal-card-body" id="cal-hud-day">4</div>
+      <div class="side-hud-card custom-hud-card">
+        <img src="assets/daily.png" alt="Calendar" class="custom-hud-img">
       </div>
     </button>
 
     <!-- Companion Pet Button -->
     <button id="pet-hud-btn" class="side-hud-btn pet-btn hidden" aria-label="Companion Pet">
-      <div class="side-hud-card pet-hud-card">
-        <div id="pet-hud-3d-container" class="pet-hud-3d-container"></div>
-        <span id="pet-mood-badge" class="pet-mood-badge mood-happy">100%</span>
+      <div class="side-hud-card custom-hud-card">
+        <img src="assets/pet-hud.png" alt="Pet" class="custom-hud-img">
       </div>
       <span class="side-hud-subtext">🍓 <span id="pet-berry-count">0</span></span>
     </button>
@@ -744,12 +737,7 @@
   <div class="modal-card extractor-card">
     <button class="close-btn" data-close="extractor-modal">✕</button>
     <div class="extractor-glow-icon">
-      <svg viewBox="0 0 32 38" style="width:38px;height:46px;display:inline-block;filter:drop-shadow(0 0 12px rgba(255, 0, 40, 0.85));">
-        <polygon points="16,2 29,12 16,16 3,12" fill="#ff6b81"/>
-        <polygon points="3,12 16,16 16,36" fill="#8b0000"/>
-        <polygon points="29,12 16,16 16,36" fill="#ff1744"/>
-        <polygon points="16,2 20,8 16,16 12,8" fill="rgba(255,255,255,0.85)"/>
-      </svg>
+      <img src="assets/mine-extractor.png" alt="Diamond Extractor" style="width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(255, 0, 40, 0.85));">
     </div>
     <h2>Diamond Extractor</h2>
     <p class="modal-sub">Automated mining beacon for your home base.</p>
@@ -1077,7 +1065,7 @@
   <div class="modal-card leaderboard-modal-card">
     <button class="close-btn" data-close="leaderboard-modal">✕</button>
     <div class="leaderboard-header">
-      <span class="lb-header-trophy">🏆</span>
+      <img src="assets/trophy.png" alt="Ranks" class="lb-header-trophy-img">
       <h2>Realm Rankings</h2>
       <p class="modal-sub">Top Landlords, Earners & Reigning Mayors</p>
     </div>
