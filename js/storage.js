@@ -1052,27 +1052,5 @@ let lastConflictCheck = {};
 
   function isCloudSyncComplete() { return cloudSyncComplete; }
 
-  /**
-   * Check if this tab's session lock is still valid in Firestore.
-   * If another tab took over, freeze this session immediately.
-   */
-  async function checkSessionLock() {
-    if (isSessionPaused) return;
-    const playerId = state?.player?.id;
-    const firestore = getDb();
-    if (!firestore || !playerId) return;
-    try {
-      const doc = await firestore.collection("saves").doc(playerId).get();
-      if (!doc.exists) return;
-      const lock = doc.data()?.sessionLock;
-      if (lock && lock.sessionId !== localSessionId) {
-        isSessionPaused = true;
-        if (typeof showToast === "function") {
-          showToast("🔒 Session taken over by another tab or device. Reload to resume.", 6000);
-        }
-      }
-    } catch (e) { /* silent — network hiccup, skip this cycle */ }
-  }
-
-  return { load, save, get, reset, totalRate, applyOfflineProgress, syncFromCloud, getDb, isSessionActive, resumeSession, isCloudSyncComplete, syncSafeStateToCloud, checkSessionLock };
+  return { load, save, get, reset, totalRate, applyOfflineProgress, syncFromCloud, getDb, isSessionActive, resumeSession, isCloudSyncComplete, syncSafeStateToCloud };
 })();

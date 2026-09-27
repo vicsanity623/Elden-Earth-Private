@@ -902,6 +902,11 @@ const CompanionPet = (() => {
       return;
     }
 
+    if ((state.pet.mood || 0) >= 100) {
+      if (typeof showToast === "function") showToast("🍓 Buddy's mood is already full! No berry needed.");
+      return;
+    }
+
     state.berries--;
     state.pet.mood = Math.min(100, (state.pet.mood || 0) + 5);
     state.pet.lastFedAt = Date.now();
@@ -1095,6 +1100,27 @@ const CompanionPet = (() => {
 
     if (berryCountEl) berryCountEl.textContent = state.berries || 0;
     if (fetchedEl) fetchedEl.textContent = state.pet.totalFetched || 0;
+
+    // Disable feed button when mood is full or no berries
+    const feedBtn = document.getElementById("pet-feed-btn");
+    if (feedBtn) {
+      const moodFull = (state.pet.mood || 0) >= 100;
+      const noBerries = (state.berries || 0) <= 0;
+      feedBtn.disabled = moodFull || noBerries;
+      if (moodFull) {
+        feedBtn.textContent = "🍓 Mood Full";
+        feedBtn.style.opacity = "0.5";
+        feedBtn.style.cursor = "not-allowed";
+      } else if (noBerries) {
+        feedBtn.textContent = "🍓 No Berries";
+        feedBtn.style.opacity = "0.5";
+        feedBtn.style.cursor = "not-allowed";
+      } else {
+        feedBtn.textContent = "🍓 Feed Berry";
+        feedBtn.style.opacity = "1";
+        feedBtn.style.cursor = "pointer";
+      }
+    }
 
     initPetModal3D();
   }

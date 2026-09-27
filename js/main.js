@@ -1419,8 +1419,8 @@
             }
 
             // Refresh leaderboard data every 60 seconds so passive rent stays current
-            if (now - lastLeaderboardRefresh >= 60000) {
-              lastLeaderboardRefresh = now;
+            if (Date.now() - lastLeaderboardRefresh >= 60000) {
+              lastLeaderboardRefresh = Date.now();
               if (typeof Leaderboard !== "undefined" && Leaderboard.fetchRankings) {
                 Leaderboard.fetchRankings(true);
               }
@@ -1525,7 +1525,6 @@
     let lastTickTime = Date.now();
     let lastIncomeCloudSave = Date.now();
     let lastLeaderboardRefresh = Date.now();
-    let lastSessionCheck = Date.now();
     setInterval(() => {
       if (document.hidden) return; // Sleep income ticker calculations when app is minimized
       if (typeof Store !== "undefined" && !Store.isSessionActive()) return; // Session paused, stop earning
@@ -1557,12 +1556,6 @@
         lastIncomeCloudSave = now;
         if (state.sessionLock) state.sessionLock.lockedAt = now;
         Store.save(true);
-      }
-
-      // Check every 45s if another tab stole the session lock
-      if (now - lastSessionCheck >= 45000) {
-        lastSessionCheck = now;
-        if (typeof Store !== "undefined" && Store.checkSessionLock) Store.checkSessionLock();
       }
 
       // 🔥 CRITICAL: Update 30X/50X button label and countdown timers every second!
@@ -2769,6 +2762,14 @@
       buyBanner?.classList.remove("hidden");
       Grid.setBuyMode(true, currentPos);
 
+      // Show buy-mode ad banner
+      const buyModeAd = el("buy-mode-ad-container");
+      if (buyModeAd) {
+        buyModeAd.classList.remove("hidden");
+        // Push a fresh ad when entering buy mode
+        try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+      }
+
       // 1. Lock camera strictly to 2D Top-Down View (minPitch = 0, maxPitch = 0)
       map.setMinPitch(0);
       map.setMaxPitch(0); // Physically impossible to tilt into 3D!
@@ -2791,6 +2792,10 @@
       document.body.classList.remove("buy-mode");
       buyBanner?.classList.add("hidden");
       Grid.setBuyMode(false);
+
+      // Hide buy-mode ad banner
+      const buyModeAd = el("buy-mode-ad-container");
+      if (buyModeAd) buyModeAd.classList.add("hidden");
 
       // 1. Restore normal 3D tilt limits (Allows 0° to 70° cinematic tilt)
       map.setMinPitch(0);
