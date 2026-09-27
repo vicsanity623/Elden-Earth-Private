@@ -601,6 +601,23 @@ const Citadels = (() => {
     if (!cit || !state) return;
 
     if (typeof ServerAntiCheat === "undefined" || !ServerAntiCheat.isReady()) return;
+
+    // Force a fresh server-side GPS ping — after a recall the player_positions
+    // doc can be stale, which makes station reject as too_far.
+    if (playerCoords && ServerAntiCheat.sendPosition) {
+      try {
+        await ServerAntiCheat.sendPosition({
+          latitude: playerCoords.lat,
+          longitude: playerCoords.lon,
+          accuracy: 10,
+          altitude: null,
+          speed: null,
+          altitudeAccuracy: null,
+          timestamp: Date.now(),
+        }, true);
+      } catch (e) {}
+    }
+
     const serverResult = await ServerAntiCheat.citadelAction("station", { citadelId: cid });
     if (!serverResult.ok) {
       showToast("⚠️ Stationing rejected: " + serverResult.reason, 3500);

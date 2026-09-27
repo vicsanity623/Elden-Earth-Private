@@ -614,7 +614,14 @@
   }
 
   // ---------------- Sign-in & Sequenced Boot ----------------
+  let _onSignedInCalled = false;
   function onSignedIn(playerData) {
+    if (_onSignedInCalled) {
+      console.log("[Main] onSignedIn already called — ignoring duplicate.");
+      return;
+    }
+    _onSignedInCalled = true;
+
     const player = playerData || Store.get()?.player || { name: "Traveler" };
     console.log("[Main] onSignedIn called with player:", player);
 
@@ -623,7 +630,12 @@
     if (signin) {
       signin.classList.add("hidden");
       signin.style.display = "none";
+      signin.style.pointerEvents = "none";
     }
+
+    // Ensure no other screens are visible during boot
+    const locationScreen = document.getElementById("location-required-screen");
+    if (locationScreen) locationScreen.classList.add("hidden");
 
     // Execute the professional 3D load pipeline
     if (typeof Bootloader !== "undefined" && Bootloader.run) {
@@ -856,13 +868,18 @@
   }
 
   let lastCameraCenter = null;
+  let _gpsGraceUntil = Date.now() + 15000; // 15-second grace period on first load
 
   function handlePosition(coords) {
     currentPos = { lat: coords.latitude, lon: coords.longitude };
     if (!map) return;
 
+    // GPS grace period: skip speed/teleport checks for 15 seconds after sign-in
+    // to prevent false positives from the auto-login → manual sign-in race condition
+    const inGracePeriod = Date.now() < _gpsGraceUntil;
+
     // Anti-cheat: Validate GPS position for spoofing
-    if (typeof AntiCheat !== "undefined") {
+    if (typeof AntiCheat !== "undefined" && !inGracePeriod) {
       const gpsCheck = AntiCheat.validatePosition(
         coords.latitude, coords.longitude,
         coords.accuracy, coords.timestamp
@@ -877,13 +894,13 @@
       }
     }
 
-    // Teleportation Sanity Watchdog
-    if (!checkTeleportation(coords.latitude, coords.longitude, coords.timestamp, coords.accuracy)) {
+    // Teleportation Sanity Watchdog (skip during grace period)
+    if (!inGracePeriod && !checkTeleportation(coords.latitude, coords.longitude, coords.timestamp, coords.accuracy)) {
       return;
     }
 
-    // GPS Accuracy & Mock Provider Detection
-    const mockCheck = detectMockProvider(coords);
+    // GPS Accuracy & Mock Provider Detection (skip during grace period)
+    const mockCheck = inGracePeriod ? { flagged: false } : detectMockProvider(coords);
     if (mockCheck.flagged) {
       console.warn(`[AntiCheat] MOCK GPS FLAGGED: ${mockCheck.reason}`);
       showToast("⚠️ Mock location detected. Please use real GPS.", 4000);
@@ -894,7 +911,8 @@
     }
 
     // Server-side position validation (async — doesn't block game loop)
-    if (typeof ServerAntiCheat !== "undefined" && ServerAntiCheat.isReady()) {
+    // Skip during grace period to prevent false rejections on first load
+    if (!inGracePeriod && typeof ServerAntiCheat !== "undefined" && ServerAntiCheat.isReady()) {
       ServerAntiCheat.sendPosition(coords).then(result => {
         if (result && !result.valid) {
           console.warn(`[ServerAntiCheat] REJECTED: ${result.reason} (speed=${result.speed}km/h)`);

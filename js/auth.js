@@ -721,6 +721,23 @@ const Auth = (() => {
           if (user) {
             console.log(`[FirebaseAuth] Active session: ${user.uid} (Google)`);
 
+            // --- INSTANTLY DISABLE SIGN-IN BUTTON ---
+            // Prevents double-tap race condition: if auto-login fires, the
+            // button must vanish immediately so the player can't tap it.
+            const signinSlot = document.getElementById("g_id_signin_slot");
+            const signinLoading = document.getElementById("google-signin-loading");
+            const signinScreen = document.getElementById("signin-screen");
+            if (signinSlot) { signinSlot.style.display = "none"; signinSlot.style.pointerEvents = "none"; }
+            if (signinLoading) {
+              signinLoading.style.display = "flex";
+              signinLoading.innerHTML = '<div class="google-spinner"></div><p class="fine-print">Connecting to the Realm...</p>';
+            }
+            // Keep sign-in screen visible as a background until loading screen takes over
+            // but disable ALL interactive elements to prevent double-taps
+            if (signinScreen) {
+              signinScreen.style.pointerEvents = "none";
+            }
+
             // --- EARLY WHITELIST CHECK: Block non-allowed emails BEFORE any cloud sync ---
             const userEmail = String(user.email || "").toLowerCase().trim();
             console.log(`[Auth] Early whitelist check for: ${userEmail}`);
@@ -781,7 +798,7 @@ const Auth = (() => {
               // --- AGE VERIFICATION GATE ---
               // Check if age was verified in the last 30 days. If not, show the gate.
               // UID exceptions: players who can't use face detection (beard/mask/medical)
-              const AGE_GATE_EXCEPTIONS = ["eCBIxfK7HyblFbFNHDVXcOZIRD42", "VBeRg8uy0AfB7EPt9KuytpsBHmb2"];
+              const AGE_GATE_EXCEPTIONS = ["eCBIxfK7HyblFbFNHDVXcOZIRD42", "VBeRg8uy0AfB7EPt9KuytpsBHmb2", "gmyLWM8UrpYHhdBZ95ayAN5V0Mo2", "GvlIPIEbPshCrQyA3Q8dgpajtal1", "eNSNe7vEDkXvCGbcsfjDOR45uRr1"];
               const ageVerified = isAgeVerified(user.uid);
               const ageGateExempt = AGE_GATE_EXCEPTIONS.includes(user.uid);
               if (!ageVerified && !ageGateExempt) {
@@ -837,6 +854,14 @@ const Auth = (() => {
         google.accounts.id.initialize({
           client_id: CONFIG.GOOGLE_CLIENT_ID,
           callback: async (resp) => {
+            // DOUBLE-SIGN-IN BLOCK: if Firebase already has a user, ignore this callback entirely
+            // This prevents the race condition where auto-login fires first and the player
+            // taps the sign-in button before the UI updates.
+            if (firebase.auth().currentUser) {
+              console.log("[Auth] Firebase already has a user — ignoring Google callback (auto-login active).");
+              return;
+            }
+
             // In-flight guard: ignore if already processing
             if (signInInProgress) {
               console.log("[Auth] Sign-in already in progress, ignoring duplicate callback.");

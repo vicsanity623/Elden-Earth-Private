@@ -156,9 +156,19 @@ const Bootloader = (() => {
   }
 
   async function run(player, onComplete) {
-    el("signin-screen")?.classList.add("hidden");
-    el("locate-screen")?.classList.add("hidden");
-    el("loading-screen")?.classList.remove("hidden");
+    // Aggressively hide ALL other screens — prevent any flickering
+    const screens = ["signin-screen", "locate-screen", "location-required-screen"];
+    screens.forEach(id => {
+      const s = el(id);
+      if (s) { s.classList.add("hidden"); s.style.display = "none"; s.style.pointerEvents = "none"; }
+    });
+
+    // Show loading screen immediately with high z-index
+    const loadingScreen = el("loading-screen");
+    if (loadingScreen) {
+      loadingScreen.classList.remove("hidden");
+      loadingScreen.style.zIndex = "99999";
+    }
 
     // 1. Mount 3D Character Stage
     setProgress(15, "Summoning explorer & core registries...");
