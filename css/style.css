@@ -2666,20 +2666,20 @@ html,body{
 .gem-sparkle-1 { top: 2px; right: 4px; animation: sparkleTwinkle 2.8s infinite 0.4s; }
 .gem-sparkle-2 { bottom: 8px; left: 2px; animation: sparkleTwinkle 2.8s infinite 1.6s; font-size: 8px; }
 
-/* Rising Ambient Stardust Particles (Red) */
+/* Rising Ambient Stardust Particles (Red & White) */
 .dust-particle {
   position: absolute;
   width: 3px;
   height: 3px;
-  background: #ff6b81;
   border-radius: 50%;
-  box-shadow: 0 0 6px #ff0033;
   opacity: 0;
   pointer-events: none;
 }
-.dust-particle.p1 { left: 6px; bottom: 4px; animation: riseDust 2.2s infinite ease-out; }
-.dust-particle.p2 { right: 8px; bottom: 6px; animation: riseDust 2.6s infinite 0.8s ease-out; }
-.dust-particle.p3 { left: 16px; bottom: 2px; animation: riseDust 2.4s infinite 1.4s ease-out; }
+.dust-particle.p1 { left: 6px; bottom: 4px; background: #ff4d6d; box-shadow: 0 0 6px #ff0033; animation: riseDust 2.2s infinite ease-out; }
+.dust-particle.p2 { right: 8px; bottom: 6px; background: #ffffff; box-shadow: 0 0 8px #ffffff; animation: riseDust 2.6s infinite 0.8s ease-out; }
+.dust-particle.p3 { left: 16px; bottom: 2px; background: #ff4d6d; box-shadow: 0 0 6px #ff0033; animation: riseDust 2.4s infinite 1.4s ease-out; }
+.dust-particle.p4 { right: 4px; bottom: 8px; background: #ffffff; box-shadow: 0 0 8px #ffffff; width: 2px; height: 2px; animation: riseDust 2.0s infinite 0.4s ease-out; }
+.dust-particle.p5 { left: 12px; bottom: 0; background: #ff6b81; box-shadow: 0 0 6px #ff0033; width: 2px; height: 2px; animation: riseDust 2.8s infinite 1.8s ease-out; }
 
 @keyframes gemHover {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -3472,12 +3472,12 @@ html,body{
 .landlord-ruler-location {
   position: absolute;
   bottom: 18px;
-  left: 15px;
+  left: 20px;
   right: 6px;
   font-size: 9.9px;
   font-weight: 700;
   color: var(--parchment);
-  text-align: center;
+  text-align: left;
   text-transform: lowercase;
   white-space: nowrap;
   overflow: hidden;

@@ -85,16 +85,17 @@ const Diamonds = (() => {
     el.className = "diamond-3d-wrapper" + (dim ? " far" : "");
 
     if (dim) {
-      // FAR DIAMOND: Static image (0 animations, 0 shadows)
+      // FAR DIAMOND: Static image with subtle sparkle
       el.innerHTML = `
         <div class="gem-anchor">
           <div class="gem-3d static-crystal">
             <img src="assets/diamond-spawn.png" class="gem-img" alt="diamond">
+            <div class="gem-sparkle-1">✦</div>
           </div>
         </div>
       `;
     } else {
-      // NEAR DIAMOND: Full rich hover, shadow pulse & sparkles
+      // NEAR DIAMOND: Full rich hover, shadow pulse, sparkles & rising dust
       const randomDuration = (2.8 + Math.random() * 0.8).toFixed(2) + "s";
       const randomDelay = (-Math.random() * 3.0).toFixed(2) + "s";
 
@@ -104,6 +105,12 @@ const Diamonds = (() => {
           <div class="gem-3d">
             <img src="assets/diamond-spawn.png" class="gem-img" alt="diamond">
             <div class="gem-sparkle-1">✦</div>
+            <div class="gem-sparkle-2">✦</div>
+            <div class="dust-particle p1"></div>
+            <div class="dust-particle p2"></div>
+            <div class="dust-particle p3"></div>
+            <div class="dust-particle p4"></div>
+            <div class="dust-particle p5"></div>
           </div>
         </div>
       `;
@@ -366,6 +373,16 @@ const Diamonds = (() => {
     map = mapboxMap;
     onCollect = callbacks.onCollect || onCollect;
     onDenied = callbacks.onDenied || onDenied;
+
+    // Clear stale diamonds from previous session — server IDs are session-scoped.
+    // This also prevents refresh-farming since the server controls spawn cooldowns.
+    const state = Store.get();
+    if (state.liveDiamonds && Object.keys(state.liveDiamonds).length > 0) {
+      console.log(`[Diamonds] Clearing ${Object.keys(state.liveDiamonds).length} stale diamonds from previous session`);
+      state.liveDiamonds = {};
+      Store.save(false);
+    }
+
     pruneExpired();
     renderAll();
 
