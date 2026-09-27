@@ -22,63 +22,9 @@ const Auth = (() => {
   }
 
   async function checkEmailAllowed(email) {
-    const emailLower = String(email || "").toLowerCase().trim();
-    console.log(`[Auth] checkEmailAllowed called for: ${emailLower}`);
-
-    // 1. Firebase Cloud Function (primary — whitelist stored in Firestore)
-    try {
-      if (typeof firebase !== "undefined" && firebase.functions) {
-        const checkWhitelist = firebase.functions().httpsCallable("checkWhitelist");
-        const result = await Promise.race([
-          checkWhitelist({ email: emailLower }),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 8000))
-        ]);
-        console.log(`[Auth] Cloud Function result:`, result.data);
-        return result.data.allowed === true;
-      } else {
-        console.warn("[Auth] Firebase Functions SDK not available");
-      }
-    } catch (e) {
-      console.warn("[Auth] Cloud Function check failed:", e.message);
-    }
-
-    // 2. Legacy access control server fallback (optional — will be removed)
-    try {
-      const serverUrl = (typeof CONFIG !== "undefined" && CONFIG.ACCESS_CONTROL_URL) || "";
-      if (!serverUrl) return false;
-      console.log(`[Auth] Trying legacy server: ${serverUrl}/check-email`);
-      const res = await fetchWithTimeout(`${serverUrl}/check-email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailLower }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        console.log(`[Auth] Legacy server response:`, data);
-        return data.allowed === true;
-      }
-    } catch (e) {
-      console.warn("[Auth] Legacy server unreachable:", e.message);
-    }
-
-    // 3. Local fallback: if Cloud Function is unreachable, allow known whitelisted emails
-    // Prevents total lockout during server outages or network issues
-    const LOCAL_WHITELIST = [
-      "vicsanity623@gmail.com",
-      "davinci8587@gmail.com",
-      "ja1070133@gmail.com",
-      "zeno.minsohn@gmail.com",
-      "sajc9498@gmail.com",
-    ];
-    const localMatch = LOCAL_WHITELIST.some(e => e.toLowerCase().trim() === emailLower);
-    if (localMatch) {
-      console.warn(`[Auth] Cloud Function unreachable — using local whitelist for: ${emailLower}`);
-      return true;
-    }
-
-    // 4. All checks failed -- deny access
-    console.warn(`[Auth] ACCESS DENIED: ${emailLower} — Cloud Function failed and not on local list`);
-    return false;
+    // Whitelist check removed — game is open to all Google sign-in users.
+    // Bad actors are handled by the ban system (Firestore banned_users).
+    return true;
   }
 
   // --- RICKROLL BAN GATE ---
