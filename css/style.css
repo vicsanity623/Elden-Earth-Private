@@ -2640,6 +2640,20 @@ html,body{
   filter: drop-shadow(0 0 6px rgba(255, 0, 40, 0.65));
 }
 
+.gem-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 0 8px rgba(255, 0, 40, 0.7));
+}
+
+.diamond-3d-wrapper.far .gem-img {
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 0 4px rgba(255, 0, 40, 0.5));
+}
+
 /* Specular Star Sparkles */
 .gem-sparkle-1, .gem-sparkle-2 {
   position: absolute;

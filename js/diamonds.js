@@ -85,21 +85,16 @@ const Diamonds = (() => {
     el.className = "diamond-3d-wrapper" + (dim ? " far" : "");
 
     if (dim) {
-      // 🚀 FAR DIAMOND: Pure static SVG crystal (0 animations, 0 shadows, 0 sparkles registered!)
+      // FAR DIAMOND: Static image (0 animations, 0 shadows)
       el.innerHTML = `
         <div class="gem-anchor">
           <div class="gem-3d static-crystal">
-            <svg viewBox="0 0 32 38" class="gem-svg">
-              <polygon points="16,2 29,12 16,16 3,12" fill="#ff4d6d"/>
-              <polygon points="3,12 16,16 16,36" fill="#8b0000"/>
-              <polygon points="29,12 16,16 16,36" fill="#e60026"/>
-              <polygon points="16,2 20,8 16,16 12,8" fill="rgba(255,255,255,0.85)"/>
-            </svg>
+            <img src="assets/mine-extractor.png" class="gem-img" alt="diamond">
           </div>
         </div>
       `;
     } else {
-      // 💎 NEAR DIAMOND: Full rich 3D hover, shadow pulse & star sparkles!
+      // NEAR DIAMOND: Full rich hover, shadow pulse & sparkles
       const randomDuration = (2.8 + Math.random() * 0.8).toFixed(2) + "s";
       const randomDelay = (-Math.random() * 3.0).toFixed(2) + "s";
 
@@ -107,12 +102,7 @@ const Diamonds = (() => {
         <div class="gem-anchor" style="--hover-dur:${randomDuration}; --hover-delay:${randomDelay};">
           <div class="gem-shadow"></div>
           <div class="gem-3d">
-            <svg viewBox="0 0 32 38" class="gem-svg">
-              <polygon points="16,2 29,12 16,16 3,12" fill="#ff4d6d"/>
-              <polygon points="3,12 16,16 16,36" fill="#8b0000"/>
-              <polygon points="29,12 16,16 16,36" fill="#e60026"/>
-              <polygon points="16,2 20,8 16,16 12,8" fill="rgba(255,255,255,0.85)"/>
-            </svg>
+            <img src="assets/mine-extractor.png" class="gem-img" alt="diamond">
             <div class="gem-sparkle-1">✦</div>
           </div>
         </div>

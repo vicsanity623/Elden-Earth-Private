@@ -442,6 +442,33 @@ const Auth = (() => {
     }
   }
 
+  // ==================== FULLY VERIFIED PLAYER LIST ====================
+  // Players who have completed auth + whitelist + age verification get added here.
+  // On return visits, they skip the slow checks for near-instant login.
+  const FULLY_VERIFIED_KEY = "eldenEarth.fullyVerified";
+
+  function isPlayerFullyVerified(uid) {
+    try {
+      const raw = localStorage.getItem(FULLY_VERIFIED_KEY);
+      if (!raw) return false;
+      const list = JSON.parse(raw);
+      return Array.isArray(list) && list.includes(uid);
+    } catch (e) { return false; }
+  }
+
+  function markPlayerFullyVerified(uid) {
+    try {
+      let list = [];
+      const raw = localStorage.getItem(FULLY_VERIFIED_KEY);
+      if (raw) list = JSON.parse(raw);
+      if (!Array.isArray(list)) list = [];
+      if (!list.includes(uid)) {
+        list.push(uid);
+        localStorage.setItem(FULLY_VERIFIED_KEY, JSON.stringify(list));
+      }
+    } catch (e) {}
+  }
+
   // ==================== AGE VERIFICATION GATE ====================
   const AGE_VERIFY_KEY = "eldenEarth.ageVerified";
   const AGE_VERIFY_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -738,6 +765,22 @@ const Auth = (() => {
               signinScreen.style.pointerEvents = "none";
             }
 
+            // --- FAST PATH: Previously verified player ---
+            // If this player has already completed full auth + age verification,
+            // skip the slow whitelist/ban checks and go straight to cloud sync.
+            const isFullyVerified = isPlayerFullyVerified(user.uid);
+            if (isFullyVerified) {
+              console.log(`[Auth] Fast path: ${user.uid} already fully verified`);
+              const s = Store.get();
+              if (s && s.player) {
+                s.player.id = user.uid;
+                await Store.syncFromCloud(user.uid);
+                if (Store.isSessionActive && !Store.isSessionActive()) return;
+                completeSignIn(Store.get().player, user.uid);
+              }
+              return;
+            }
+
             // --- EARLY WHITELIST CHECK: Block non-allowed emails BEFORE any cloud sync ---
             const userEmail = String(user.email || "").toLowerCase().trim();
             console.log(`[Auth] Early whitelist check for: ${userEmail}`);
@@ -813,6 +856,9 @@ const Auth = (() => {
               } else if (ageGateExempt) {
                 console.log(`[Auth] Age gate exempt: ${user.uid}`);
               }
+
+              // Mark player as fully verified for fast-path on return visits
+              markPlayerFullyVerified(user.uid);
 
               completeSignIn(Store.get().player, user.uid);
             }
