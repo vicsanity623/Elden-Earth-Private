@@ -1073,10 +1073,9 @@ html,body{
 
 /* ---------- Floating +2 EB Boost Button ---------- */
 .boost-btn {
-  position: absolute;
-  right: 16px;
-  /* Floats cleanly above the bottom bar & chat button */
-  bottom: 125px;
+  position: fixed;
+  left: 14px;
+  top: 320px;
   z-index: 999;
   display: flex;
   align-items: center;
@@ -3409,7 +3408,7 @@ html,body{
 /* --- Landlord Title Pill (Mayor / Governor / President) --- */
 .landlord-pill {
   position: fixed;
-  bottom: 250px;
+  bottom: 80px;
   right: 4px;
   z-index: 20;
   pointer-events: none;
@@ -3758,7 +3757,7 @@ body.buy-mode #treasury-ad-container {
   position: absolute;
   left: 14px;
   /* Lifted cleanly above the 30X Multiplier button */
-  bottom: 188px;
+  top: 380px;
   z-index: 22;
   display: flex;
   flex-direction: column;
@@ -5345,9 +5344,9 @@ div[aria-label="Advertisement"] {
 
 /* Side Floating HUD Button */
 .weekly-pool-btn {
-  position: absolute;
-  right: 14px;
-  bottom: 188px;
+  position: fixed;
+  left: 14px;
+  top: 270px;
   z-index: 22;
   background: url('../assets/button-frame.png') no-repeat center center / 100% 100%, #000;
   border: none;
