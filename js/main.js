@@ -2919,11 +2919,15 @@
         const treasuryAd = el("treasury-ad-container");
         if (treasuryAd && treasuryAd.offsetParent !== null && !document.body.classList.contains("buy-mode")) {
           try {
+            // Remove old <ins> and create a fresh one
             const oldIns = treasuryAd.querySelector("ins.adsbygoogle");
-            if (oldIns) {
-              const newIns = oldIns.cloneNode(true);
-              treasuryAd.replaceChild(newIns, oldIns);
-            }
+            if (oldIns) oldIns.remove();
+            const ins = document.createElement("ins");
+            ins.className = "adsbygoogle";
+            ins.style.cssText = "display:inline-block;width:320px;height:50px";
+            ins.setAttribute("data-ad-client", "ca-pub-5972331036113330");
+            ins.setAttribute("data-ad-slot", "4287691766");
+            treasuryAd.appendChild(ins);
             (window.adsbygoogle = window.adsbygoogle || []).push({});
           } catch (e) {}
         }
@@ -3118,23 +3122,30 @@
       const REFRESH_INTERVAL_MS = 30000;
       let lastAdRefreshTime = 0;
 
+      function createFreshAd() {
+        // Remove old <ins> entirely — cloning doesn't reset AdSense internal state
+        const oldIns = adContainer.querySelector("ins.adsbygoogle");
+        if (oldIns) oldIns.remove();
+
+        // Build a brand-new <ins> element from scratch
+        const ins = document.createElement("ins");
+        ins.className = "adsbygoogle";
+        ins.style.cssText = "display:inline-block;width:320px;height:50px";
+        ins.setAttribute("data-ad-client", "ca-pub-5972331036113330");
+        ins.setAttribute("data-ad-slot", "4287691766");
+        adContainer.appendChild(ins);
+
+        // Push to AdSense queue to fill the fresh slot
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      }
+
       function refreshAd() {
         if (document.hidden) return;
         if (adContainer.offsetParent === null) return;
         if (document.body.classList.contains("buy-mode")) return;
 
         try {
-          // Clone and replace the <ins> element to reset AdSense state
-          const oldIns = adContainer.querySelector("ins.adsbygoogle");
-          if (oldIns) {
-            const newIns = oldIns.cloneNode(true);
-            // Ensure data attributes survive the clone (some browsers strip them)
-            newIns.setAttribute("data-ad-client", "ca-pub-5972331036113330");
-            newIns.setAttribute("data-ad-slot", "4287691766");
-            newIns.style.cssText = "display:inline-block;width:320px;height:50px";
-            adContainer.replaceChild(newIns, oldIns);
-          }
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          createFreshAd();
           lastAdRefreshTime = Date.now();
           console.log("[AdSense] Treasury banner refreshed.");
         } catch (e) {
