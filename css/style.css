@@ -3733,7 +3733,7 @@ body.buy-mode #treasury-ad-container {
 .side-hud-stack {
   position: fixed;
   left: 14px;
-  top: 295px;
+  top: 300px;
   bottom: 120px;
   z-index: 22;
   display: flex;
@@ -7940,6 +7940,10 @@ body.birds-eye-mode .top-hud-row {
 /* --- Unified Stack: Pool / Boost / Multiplier overrides --- */
 .weekly-pool-btn.side-hud-btn {
   position: static;
+  background: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
 }
 
 .boost-btn-stack {
@@ -7951,7 +7955,7 @@ body.birds-eye-mode .top-hud-row {
 }
 
 .pool-card {
-  background: rgba(255, 43, 67, 0.15) !important;
+  background: transparent !important;
 }
 
 .pool-icon {
@@ -7959,7 +7963,7 @@ body.birds-eye-mode .top-hud-row {
 }
 
 .boost-card {
-  background: rgba(255, 215, 0, 0.15) !important;
+  background: transparent !important;
 }
 
 .boost-icon {
@@ -7968,7 +7972,7 @@ body.birds-eye-mode .top-hud-row {
 }
 
 .mult-card {
-  background: rgba(255, 43, 67, 0.2) !important;
+  background: transparent !important;
 }
 
 .mult-tag {

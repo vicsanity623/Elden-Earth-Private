@@ -282,7 +282,7 @@
     <div class="hero-balance-card" id="hero-balance-card">
       <div class="hero-top-line">
         <div class="hero-brand-title">
-          <span class="hero-brand-gem">◆</span> ELDEN EARTH <span class="hero-version-tag">0.1.10.90b</span>
+          <span class="hero-brand-gem">◆</span> ELDEN EARTH <span class="hero-version-tag">0.1.10.91b</span>
         </div>
         <div id="boost-timer-badge" class="boost-timer-badge hidden">⚡ 30X BOOST <span id="boost-countdown">00:00:00</span></div>
       </div>
@@ -381,7 +381,7 @@
     <!-- Weekly Pool Button (moved into stack) -->
     <button id="weekly-pool-hud-btn" class="side-hud-btn weekly-pool-btn" aria-label="Weekly Dividend Pool">
       <div class="side-hud-card custom-hud-card pool-card">
-        <span class="pool-icon">👑</span>
+        <img src="assets/pool.png" alt="Pool" class="custom-hud-img">
       </div>
       <span class="side-hud-subtext" id="hud-pool-countdown">POOL 0D</span>
     </button>
@@ -389,7 +389,7 @@
     <!-- +2 EB Boost Button (moved into stack) -->
     <button id="boost-btn" class="side-hud-btn boost-btn-stack hidden" aria-label="Boost">
       <div class="side-hud-card custom-hud-card boost-card">
-        <span class="boost-icon">⚡</span>
+        <img src="assets/2eb-boost.png" alt="+2 EB Boost" class="custom-hud-img">
       </div>
       <span class="side-hud-subtext">+2 EB</span>
     </button>
@@ -397,7 +397,8 @@
     <!-- 30X/50X Multiplier Button (moved into stack) -->
     <button id="multiplier-btn" class="side-hud-btn multiplier-btn-stack" aria-label="Multiplier Boost">
       <div class="side-hud-card custom-hud-card mult-card">
-        <span class="mult-tag" id="mult-label">30X</span>
+        <img id="mult-img" src="assets/30x.png" alt="30X Boost" class="custom-hud-img">
+        <span class="mult-tag hidden" id="mult-label">30X</span>
       </div>
       <span class="side-hud-subtext">BOOST</span>
     </button>
@@ -477,13 +478,8 @@
     <span class="territory-text" id="territory-text">Scanning location...</span>
   </div>
 
-  <!-- Buy Land Mode Ad Banner -->
-  <div id="buy-mode-ad-container" class="buy-mode-ad hidden">
-    <ins class="adsbygoogle"
-         style="display:inline-block;width:320px;height:50px"
-         data-ad-client="ca-pub-5972331036113330"
-         data-ad-slot="4287691766"></ins>
-  </div>
+  <!-- Buy Land Mode Ad Banner (ins element created dynamically to avoid slot conflict) -->
+  <div id="buy-mode-ad-container" class="buy-mode-ad hidden"></div>
 
   <!-- Bottom bar with Community Chat Button -->
   <div id="bottombar">

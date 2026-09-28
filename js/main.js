@@ -2873,12 +2873,20 @@
       buyBanner?.classList.remove("hidden");
       Grid.setBuyMode(true, currentPos);
 
-      // Show buy-mode ad banner
+      // Show buy-mode ad banner (dynamically create ins to avoid slot conflict with treasury ad)
       const buyModeAd = el("buy-mode-ad-container");
       if (buyModeAd) {
         buyModeAd.classList.remove("hidden");
-        // Push a fresh ad when entering buy mode
-        try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+        // Only create ins if not already present
+        if (!buyModeAd.querySelector("ins.adsbygoogle")) {
+          const ins = document.createElement("ins");
+          ins.className = "adsbygoogle";
+          ins.style.cssText = "display:inline-block;width:320px;height:50px";
+          ins.setAttribute("data-ad-client", "ca-pub-5972331036113330");
+          ins.setAttribute("data-ad-slot", "4287691766");
+          buyModeAd.appendChild(ins);
+          try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+        }
       }
 
       // 1. Lock camera strictly to 2D Top-Down View (minPitch = 0, maxPitch = 0)
@@ -2904,9 +2912,22 @@
       buyBanner?.classList.add("hidden");
       Grid.setBuyMode(false);
 
-      // Hide buy-mode ad banner
+      // Hide buy-mode ad banner and remove ins element to free the slot for treasury ad
       const buyModeAd = el("buy-mode-ad-container");
-      if (buyModeAd) buyModeAd.classList.add("hidden");
+      if (buyModeAd) {
+        buyModeAd.classList.add("hidden");
+        // Remove the ins element so treasury ad can use the slot
+        const ins = buyModeAd.querySelector("ins.adsbygoogle");
+        if (ins) ins.remove();
+      }
+
+      // Re-push treasury ad now that the slot is free
+      setTimeout(() => {
+        const treasuryAd = el("treasury-ad-container");
+        if (treasuryAd && treasuryAd.offsetParent !== null && !document.body.classList.contains("buy-mode")) {
+          try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+        }
+      }, 500);
 
       // 1. Restore normal 3D tilt limits (Allows 0° to 70° cinematic tilt)
       map.setMinPitch(0);
@@ -3095,10 +3116,14 @@
       if (!adContainer) return;
 
       const REFRESH_INTERVAL_MS = 30000; // Strictly 30-second compliant interval (was 60s)
-      let lastAdRefreshTime = Date.now();
+      let lastAdRefreshTime = 0;
 
       function refreshAd() {
         if (document.hidden) return;
+        // Don't push if container is hidden (e.g. buy-mode or birds-eye)
+        if (adContainer.offsetParent === null) return;
+        // Don't push if buy-mode is active (buy-mode ad owns the slot)
+        if (document.body.classList.contains("buy-mode")) return;
 
         try {
           const ins = adContainer.querySelector("ins.adsbygoogle");
@@ -3114,10 +3139,10 @@
         }
       }
 
-      // Initial push on game load
-      try {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (e) {}
+      // Delay initial push by 3 seconds to let DOM settle and AdSense SDK load
+      setTimeout(() => {
+        refreshAd();
+      }, 3000);
 
       // 30-Second Refresh Ticker
       setInterval(() => {

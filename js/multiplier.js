@@ -218,14 +218,18 @@ const Multiplier = (() => {
     const is50XEvent = is50XActive();
     const isBoosted = state.boostExpiry && state.boostExpiry > now;
 
-    // Update Floating Button Tag with effective multiplier (scaled by plot count)
+    // Swap the multiplier button image between 30x.png and 50x.png
+    // Always show the BASE multiplier on the side hub (30X or 50X), not the
+    // tier-collapsed effective value — whales see the real number in the top bar.
+    const multImg = el("mult-img");
+    if (multImg) {
+      multImg.src = is50XEvent ? "assets/50x.png" : "assets/30x.png";
+      multImg.alt = is50XEvent ? "50X Boost" : "30X Boost";
+    }
+    // Keep hidden mult-label in sync for accessibility / fallback
     const multLabel = el("mult-label");
     if (multLabel) {
-      const baseMult = is50XEvent ? 50 : 30;
-      const plotCount = state.plots ? Object.keys(state.plots).length : 0;
-      const tierFactor = getTierFactor(plotCount);
-      const effectiveMult = Math.round(baseMult * tierFactor);
-      multLabel.textContent = effectiveMult + "X";
+      multLabel.textContent = is50XEvent ? "50X" : "30X";
     }
 
     if (multBtn) {
@@ -318,7 +322,7 @@ const Multiplier = (() => {
         const plotCount = state.plots ? Object.keys(state.plots).length : 0;
         const tierFactor = getTierFactor(plotCount);
         const effectiveMult = Math.round(baseMult * tierFactor);
-        el("mult-label").textContent = effectiveMult + "X";
+        // Modal shows the REAL effective multiplier (with whale tier collapse)
         el("booster-modal-title").textContent = is50X ? "🔥 Activate 50X Super Boost" : "Activate 30X Boost";
         el("modal-mult-rate").textContent = `${effectiveMult}X Income`;
         document.getElementById("booster-modal")?.classList.remove("hidden");
