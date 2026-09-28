@@ -8,7 +8,7 @@ const ProfanityFilter = (() => {
   const PROFANITY_LIST = [
     // Sexual/Anatomical
     "anal", "anus", "ass", "asshole", "bastard", "bitch", "boob", "boobs",
-    "cock", "cunt", "dick", "dickhead", "dildo", "fag", "faggot", "fuck", "fucking",
+    "cock", "cunt", "dick", "dickhead", "dildo", "fag", "faggot",
     "pussy", "rape", "rapist", "sex", "sexual", "slut", "whore",
     
     // Racial/Ethnic Slurs
@@ -16,15 +16,14 @@ const ProfanityFilter = (() => {
     "chink", "gook", "towelhead", "cracker", "honky",
     
     // Other Offensive
-    "bitch", "bullshit", "crap", "damn", "dick", "douche", "fag",
-    "faggot", "fuck", "fucking", "hell", "jackass", "jerk", "piss",
-    "prick", "pussy", "retard", "shit", "slut", "whore",
+    "bullshit", "crap", "dick", "douche", "fag",
+    "faggot", "prick", "pussy", "slut", "whore",
     
     // Violence/Abuse
     "abuse", "kill", "murder", "rape", "rapist", "suicide",
     
     // Drugs
-    "cocaine", "crack", "heroin", "meth", "weed"
+    "cocaine", "crack", "heroin", "meth"
   ];
 
   // Leetspeak character mapping
