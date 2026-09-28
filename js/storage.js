@@ -46,7 +46,7 @@ const Store = (() => {
 
   function defaultState() {
     return {
-      player: { name: "Traveler", id: null, avatar: "🙂", model3d: "robot", freeSpins: 0, freeSpinsNoDiamondCost: false, phoneVerified: false },
+      player: { name: "Traveler", id: null, avatar: "🙂", model3d: "soldier", freeSpins: 0, freeSpinsNoDiamondCost: false, phoneVerified: false },
       cash: 0,
       lifetimeRent: 0,
       eb: 0,
@@ -364,7 +364,7 @@ const Store = (() => {
   // Smart 30-Second Cloud Save Throttle (Cuts Firestore writes by ~90%!)
   let cloudSyncTimeout = null;
   let lastCloudSyncTime = 0;
-  const CLOUD_SYNC_THROTTLE_MS = 20000; // 20-second window
+  const CLOUD_SYNC_THROTTLE_MS = 1000; // 1-second window — near-instant cloud sync
 
   function syncToCloudDebounced(immediateCloud = false) {
     const now = Date.now();
@@ -435,9 +435,46 @@ const Store = (() => {
           const takeOverBtn = document.getElementById("resume-session-btn");
           if (takeOverBtn && !takeOverBtn._wired) {
             takeOverBtn._wired = true;
-            takeOverBtn.addEventListener("click", () => {
+            takeOverBtn.addEventListener("click", async () => {
+              // CRITICAL: Fetch cloud state FIRST to preserve model3d, boost, plots
+              // before claiming the lock. Without this, the default in-memory state
+              // (model3d:"soldier", boostExpiry:0) overwrites the real cloud save.
+              try {
+                const firestore = getDb();
+                if (firestore && playerId) {
+                  const cloudDoc = await firestore.collection("saves").doc(playerId).get();
+                  if (cloudDoc.exists) {
+                    const cloudData = cloudDoc.data() || {};
+                    // Preserve critical cloud fields that the default state would destroy
+                    if (cloudData.player?.model3d && cloudData.player.model3d !== state.player?.model3d) {
+                      console.log(`[TakeOver] Preserving cloud model3d: ${cloudData.player.model3d}`);
+                      if (!state.player) state.player = {};
+                      state.player.model3d = cloudData.player.model3d;
+                    }
+                    if (Number(cloudData.boostExpiry) > Number(state.boostExpiry || 0)) {
+                      console.log(`[TakeOver] Preserving cloud boostExpiry: ${cloudData.boostExpiry}`);
+                      state.boostExpiry = cloudData.boostExpiry;
+                      state.boostMultiplier = cloudData.boostMultiplier || state.boostMultiplier;
+                    }
+                    if (cloudData.plots && Object.keys(cloudData.plots).length > Object.keys(state.plots || {}).length) {
+                      console.log(`[TakeOver] Preserving cloud plots (${Object.keys(cloudData.plots).length} > ${Object.keys(state.plots || {}).length})`);
+                      state.plots = cloudData.plots;
+                    }
+                    if (cloudData.eb !== undefined) state.eb = cloudData.eb;
+                    if (cloudData.cash !== undefined) state.cash = cloudData.cash;
+                    if (cloudData.diamonds !== undefined) state.diamonds = cloudData.diamonds;
+                    if (cloudData.lifetimeRent !== undefined) state.lifetimeRent = cloudData.lifetimeRent;
+                    if (cloudData.extractor) state.extractor = cloudData.extractor;
+                    if (cloudData.pet) state.pet = cloudData.pet;
+                    if (cloudData.calendar) state.calendar = cloudData.calendar;
+                  }
+                }
+              } catch (e) {
+                console.warn("[TakeOver] Failed to read cloud state:", e);
+              }
               // Force-takeover: claim the lock and reload
               state.sessionLock = { sessionId: localSessionId, lockedAt: Date.now() };
+              state.lastSavedAt = Date.now();
               localStorage.setItem(KEY, JSON.stringify(state));
               syncSafeStateToCloud().finally(() => window.location.reload());
             });
@@ -1023,13 +1060,46 @@ let lastConflictCheck = {};
     return !isSessionPaused;
   }
 
-  function resumeSession() {
+  async function resumeSession() {
     isSessionPaused = false;
     document.getElementById("session-conflict-modal")?.classList.add("hidden");
 
-    // Keep this tab's persisted session ID so the reload is not treated as a
-    // brand-new competing session.
+    // CRITICAL: Fetch cloud state FIRST to preserve model3d, boost, plots
+    // before writing our session lock. Without this, the default in-memory state
+    // overwrites the real cloud save on reload.
+    try {
+      const firestore = getDb();
+      if (firestore && state?.player?.id) {
+        const cloudDoc = await firestore.collection("saves").doc(state.player.id).get();
+        if (cloudDoc.exists) {
+          const cloudData = cloudDoc.data() || {};
+          if (cloudData.player?.model3d && cloudData.player.model3d !== state.player?.model3d) {
+            if (!state.player) state.player = {};
+            state.player.model3d = cloudData.player.model3d;
+          }
+          if (Number(cloudData.boostExpiry) > Number(state.boostExpiry || 0)) {
+            state.boostExpiry = cloudData.boostExpiry;
+            state.boostMultiplier = cloudData.boostMultiplier || state.boostMultiplier;
+          }
+          if (cloudData.plots && Object.keys(cloudData.plots).length > Object.keys(state.plots || {}).length) {
+            state.plots = cloudData.plots;
+          }
+          if (cloudData.eb !== undefined) state.eb = cloudData.eb;
+          if (cloudData.cash !== undefined) state.cash = cloudData.cash;
+          if (cloudData.diamonds !== undefined) state.diamonds = cloudData.diamonds;
+          if (cloudData.lifetimeRent !== undefined) state.lifetimeRent = cloudData.lifetimeRent;
+          if (cloudData.extractor) state.extractor = cloudData.extractor;
+          if (cloudData.pet) state.pet = cloudData.pet;
+          if (cloudData.calendar) state.calendar = cloudData.calendar;
+        }
+      }
+    } catch (e) {
+      console.warn("[ResumeSession] Failed to read cloud state:", e);
+    }
+
     state.sessionLock = { sessionId: localSessionId, lockedAt: Date.now() };
+    state.lastSavedAt = Date.now();
+    localStorage.setItem(KEY, JSON.stringify(state));
     syncSafeStateToCloud().finally(() => window.location.reload());
   }
 
