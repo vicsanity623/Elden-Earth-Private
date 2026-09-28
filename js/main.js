@@ -1668,12 +1668,27 @@
       // Set ruler avatar (large circle)
       if (ruler) {
         let rulerAvatar = "👤";
-        const allPlots = (typeof Grid !== "undefined" && Grid.getAllPlots) ? Grid.getAllPlots() : {};
-        for (const tid in allPlots) {
-          const p = allPlots[tid];
-          if (p.ownerId === ruler.ownerId && p.avatar) {
-            rulerAvatar = p.avatar;
-            break;
+        // If the ruler is the current player, use their live avatar from state
+        const myId = Store.get()?.player?.id;
+        if (ruler.ownerId === myId) {
+          rulerAvatar = Store.get()?.player?.avatar || "👤";
+        } else {
+          // Look up from leaderboard data (has latest avatar from Firestore)
+          const lbData = typeof Leaderboard !== "undefined" && Leaderboard.fetchRankings
+            ? await Leaderboard.fetchRankings() : null;
+          const rulerPlayer = lbData?.players?.find(p => p.id === ruler.ownerId);
+          if (rulerPlayer?.avatar) {
+            rulerAvatar = rulerPlayer.avatar;
+          } else {
+            // Fallback: scan plots
+            const allPlots = (typeof Grid !== "undefined" && Grid.getAllPlots) ? Grid.getAllPlots() : {};
+            for (const tid in allPlots) {
+              const p = allPlots[tid];
+              if (p.ownerId === ruler.ownerId && p.avatar) {
+                rulerAvatar = p.avatar;
+                break;
+              }
+            }
           }
         }
         if (rulerAvatar.startsWith("img:")) {

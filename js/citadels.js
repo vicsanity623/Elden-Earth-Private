@@ -212,7 +212,12 @@ const Citadels = (() => {
         </div>
       `;
     } else {
-      const defAvatar = citadel.defender?.avatar || "🛡️";
+      let defAvatar = citadel.defender?.avatar || "🛡️";
+      // Use current player avatar if this is your citadel
+      const myId = Store.get()?.player?.id;
+      if (citadel.defender?.id === myId) {
+        defAvatar = Store.get()?.player?.avatar || defAvatar;
+      }
       const avatarHTML = defAvatar.startsWith("img:")
         ? `<img src="${defAvatar.slice(4)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
         : `<span>${defAvatar}</span>`;
@@ -453,9 +458,15 @@ const Citadels = (() => {
     const chamberAvatar = document.getElementById("citadel-defender-avatar");
     if (chamberAvatar) {
       if (def && def.avatar) {
-        chamberAvatar.innerHTML = def.avatar.startsWith("img:")
-          ? `<img src="${def.avatar.slice(4)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
-          : `<span style="font-size:32px;">${def.avatar}</span>`;
+        // Use current player avatar if this is your citadel, otherwise use stored snapshot
+        const myId = Store.get()?.player?.id;
+        let avatar = def.avatar;
+        if (def.id === myId) {
+          avatar = Store.get()?.player?.avatar || def.avatar;
+        }
+        chamberAvatar.innerHTML = avatar.startsWith("img:")
+          ? `<img src="${avatar.slice(4)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
+          : `<span style="font-size:32px;">${avatar}</span>`;
       } else {
         chamberAvatar.innerHTML = `<span style="font-size:32px;">🛡️</span>`;
       }
