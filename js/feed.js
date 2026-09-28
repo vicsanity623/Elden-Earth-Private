@@ -40,12 +40,22 @@ const Feed = (() => {
     };
 
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`, {
-        headers: { "User-Agent": "EldenEarth/1.0 (vicsanity623.github.io)" }
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
+        headers: { "User-Agent": "EldenEarth/1.0 (vicsanity623.github.io)", "Accept-Language": "en" }
       });
       const data = await res.json();
       const addr = data.address || {};
-      const city = addr.city || addr.town || addr.municipality || addr.village || "";
+      let city = addr.city || "";
+      const town = addr.town || "";
+      const municipality = addr.municipality || "";
+      const suburb = addr.suburb || "";
+      const neighbourhood = addr.neighbourhood || "";
+      const MAJOR_CITIES = ["phoenix","scottsdale","mesa","chandler","glendale","tempe","los angeles","new york","chicago","houston","kansas city","san antonio","san diego","dallas","austin","jacksonville","fort worth","columbus","charlotte","indianapolis","san francisco","seattle","denver","boston","nashville","portland","las vegas","miami","atlanta","detroit","minneapolis","tampa","orlando","st. louis","sacramento","pittsburgh","cincinnati","raleigh","memphis"];
+      if (city && MAJOR_CITIES.includes(city.toLowerCase())) {
+        const enclave = town || municipality || suburb || neighbourhood;
+        if (enclave && enclave.toLowerCase() !== city.toLowerCase()) city = enclave;
+      }
+      if (!city) city = town || addr.village || municipality || suburb || neighbourhood || "";
       const rawState = addr.state || "";
       const stateCode = US_STATES[rawState] || (rawState.length === 2 ? rawState.toUpperCase() : "");
       const stateStr = stateCode ? `, ${stateCode}` : "";

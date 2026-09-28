@@ -2957,7 +2957,20 @@
         const data = await res.json();
         const addr = data.address || {};
 
-        const city = addr.city || addr.town || addr.village || addr.hamlet || addr.municipality || "";
+        // Enclave detection: if city is a major metro, prefer more specific fields
+        let city = addr.city || "";
+        const town = addr.town || "";
+        const municipality = addr.municipality || "";
+        const suburb = addr.suburb || "";
+        const neighbourhood = addr.neighbourhood || "";
+        const MAJOR_CITIES = ["phoenix","scottsdale","mesa","chandler","glendale","tempe","los angeles","new york","chicago","houston","kansas city","san antonio","san diego","dallas","austin","jacksonville","fort worth","columbus","charlotte","indianapolis","san francisco","seattle","denver","boston","nashville","portland","las vegas","miami","atlanta","detroit","minneapolis","tampa","orlando","st. louis","sacramento","pittsburgh","cincinnati","raleigh","memphis"];
+
+        if (city && MAJOR_CITIES.includes(city.toLowerCase())) {
+          const enclave = town || municipality || suburb || neighbourhood;
+          if (enclave && enclave.toLowerCase() !== city.toLowerCase()) city = enclave;
+        }
+        if (!city) city = town || addr.village || municipality || suburb || neighbourhood || "";
+
         const state = addr.state || addr.county || "";
         const country = addr.country_code ? addr.country_code.toUpperCase() : "";
 

@@ -1,5 +1,5 @@
 // Bump this version string whenever you deploy an update!
-const CACHE_NAME = 'elden-EARTH-v24.12';
+const CACHE_NAME = 'elden-EARTH-v24.14';
 
 const ASSETS_TO_CACHE = [
     './',
@@ -32,7 +32,15 @@ const ASSETS_TO_CACHE = [
     './js/pool.js',
     './js/referrals.js',
     './js/server-anticheat.js',
-    './js/pet.js'
+    './js/pet.js',
+    './js/profanity-filter.js',
+    './assets/trophy.png',
+    './assets/mine-extractor.png',
+    './assets/daily.png',
+    './assets/pet-hud.png',
+    './assets/diamond-spawn.png',
+    './assets/ruler.png',
+    './assets/rickroll.mp4'
 ];
 
 // 1. Force Immediate Activation without waiting for tabs to close
