@@ -2891,6 +2891,22 @@
       buyBanner?.classList.remove("hidden");
       Grid.setBuyMode(true, currentPos);
 
+      // Show buy-mode ad banner (dynamically create ins to avoid slot conflict with treasury ad)
+      const buyModeAd = el("buy-mode-ad-container");
+      if (buyModeAd) {
+        buyModeAd.classList.remove("hidden");
+        // Only create ins if not already present
+        if (!buyModeAd.querySelector("ins.adsbygoogle")) {
+          const ins = document.createElement("ins");
+          ins.className = "adsbygoogle";
+          ins.style.cssText = "display:inline-block;width:320px;height:50px";
+          ins.setAttribute("data-ad-client", "ca-pub-5972331036113330");
+          ins.setAttribute("data-ad-slot", "4287691766");
+          buyModeAd.appendChild(ins);
+          try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+        }
+      }
+
       // 1. Lock camera strictly to 2D Top-Down View (minPitch = 0, maxPitch = 0)
       map.setMinPitch(0);
       map.setMaxPitch(0); // Physically impossible to tilt into 3D!
@@ -2914,22 +2930,20 @@
       buyBanner?.classList.add("hidden");
       Grid.setBuyMode(false);
 
-      // Re-push treasury ad now that buy-mode is closed
+      // Hide buy-mode ad banner and remove ins element to free the slot for treasury ad
+      const buyModeAd = el("buy-mode-ad-container");
+      if (buyModeAd) {
+        buyModeAd.classList.add("hidden");
+        // Remove the ins element so treasury ad can use the slot
+        const ins = buyModeAd.querySelector("ins.adsbygoogle");
+        if (ins) ins.remove();
+      }
+
+      // Re-push treasury ad now that the slot is free
       setTimeout(() => {
         const treasuryAd = el("treasury-ad-container");
         if (treasuryAd && treasuryAd.offsetParent !== null && !document.body.classList.contains("buy-mode")) {
-          try {
-            // Remove old <ins> and create a fresh one
-            const oldIns = treasuryAd.querySelector("ins.adsbygoogle");
-            if (oldIns) oldIns.remove();
-            const ins = document.createElement("ins");
-            ins.className = "adsbygoogle";
-            ins.style.cssText = "display:inline-block;width:320px;height:50px";
-            ins.setAttribute("data-ad-client", "ca-pub-5972331036113330");
-            ins.setAttribute("data-ad-slot", "4287691766");
-            treasuryAd.appendChild(ins);
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-          } catch (e) {}
+          try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
         }
       }, 500);
 
@@ -3114,49 +3128,35 @@
       }
     });
     
-    // --- Google AdSense Compliant 30-Second Treasury Ad Refresher ---
+    // --- Google AdSense Compliant 60-Second Treasury Ad Refresher ---
     function initTreasuryAdRefresher() {
       const adContainer = el("treasury-ad-container");
       if (!adContainer) return;
 
-      const REFRESH_INTERVAL_MS = 30000;
-      let lastAdRefreshTime = 0;
-
-      function createFreshAd() {
-        // Remove old <ins> entirely — cloning doesn't reset AdSense internal state
-        const oldIns = adContainer.querySelector("ins.adsbygoogle");
-        if (oldIns) oldIns.remove();
-
-        // Build a brand-new <ins> element from scratch
-        const ins = document.createElement("ins");
-        ins.className = "adsbygoogle";
-        ins.style.cssText = "display:inline-block;width:320px;height:50px";
-        ins.setAttribute("data-ad-client", "ca-pub-5972331036113330");
-        ins.setAttribute("data-ad-slot", "4287691766");
-        adContainer.appendChild(ins);
-
-        // Push to AdSense queue to fill the fresh slot
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      }
+      const REFRESH_INTERVAL_MS = 30000; // Strictly 30-second compliant interval (was 60s)
+      let lastAdRefreshTime = Date.now();
 
       function refreshAd() {
         if (document.hidden) return;
-        if (adContainer.offsetParent === null) return;
-        if (document.body.classList.contains("buy-mode")) return;
 
         try {
-          createFreshAd();
-          lastAdRefreshTime = Date.now();
-          console.log("[AdSense] Treasury banner refreshed.");
+          const ins = adContainer.querySelector("ins.adsbygoogle");
+          if (ins) {
+             // Google documentation recommends clearing the innerHTML 
+             // and pushing to the global queue again
+             (window.adsbygoogle = window.adsbygoogle || []).push({});
+             lastAdRefreshTime = Date.now();
+             console.log("[AdSense] Refreshed banner successfully.");
+          }
         } catch (e) {
           console.warn("[AdSense] Refresh notice:", e);
         }
       }
 
-      // Initial push — wait 5 seconds for AdSense SDK to fully load
-      setTimeout(() => { refreshAd(); }, 5000);
-      // Retry at 10s in case SDK was slow
-      setTimeout(() => { refreshAd(); }, 10000);
+      // Initial push on game load
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (e) {}
 
       // 30-Second Refresh Ticker
       setInterval(() => {
@@ -3166,7 +3166,7 @@
         }
       }, REFRESH_INTERVAL_MS);
 
-      // Refresh when waking up from background
+      // Refresh when waking up if 30 seconds have elapsed
       document.addEventListener("visibilitychange", () => {
         if (!document.hidden && (Date.now() - lastAdRefreshTime >= REFRESH_INTERVAL_MS)) {
           refreshAd();
