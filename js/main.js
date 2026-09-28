@@ -2891,22 +2891,6 @@
       buyBanner?.classList.remove("hidden");
       Grid.setBuyMode(true, currentPos);
 
-      // Show buy-mode ad banner (dynamically create ins to avoid slot conflict with treasury ad)
-      const buyModeAd = el("buy-mode-ad-container");
-      if (buyModeAd) {
-        buyModeAd.classList.remove("hidden");
-        // Only create ins if not already present
-        if (!buyModeAd.querySelector("ins.adsbygoogle")) {
-          const ins = document.createElement("ins");
-          ins.className = "adsbygoogle";
-          ins.style.cssText = "display:inline-block;width:320px;height:50px";
-          ins.setAttribute("data-ad-client", "ca-pub-5972331036113330");
-          ins.setAttribute("data-ad-slot", "4287691766");
-          buyModeAd.appendChild(ins);
-          try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
-        }
-      }
-
       // 1. Lock camera strictly to 2D Top-Down View (minPitch = 0, maxPitch = 0)
       map.setMinPitch(0);
       map.setMaxPitch(0); // Physically impossible to tilt into 3D!
@@ -2930,21 +2914,11 @@
       buyBanner?.classList.add("hidden");
       Grid.setBuyMode(false);
 
-      // Hide buy-mode ad banner and remove ins element to free the slot for treasury ad
-      const buyModeAd = el("buy-mode-ad-container");
-      if (buyModeAd) {
-        buyModeAd.classList.add("hidden");
-        // Remove the ins element so treasury ad can use the slot
-        const ins = buyModeAd.querySelector("ins.adsbygoogle");
-        if (ins) ins.remove();
-      }
-
-      // Re-push treasury ad now that the slot is free
+      // Re-push treasury ad now that buy-mode is closed
       setTimeout(() => {
         const treasuryAd = el("treasury-ad-container");
         if (treasuryAd && treasuryAd.offsetParent !== null && !document.body.classList.contains("buy-mode")) {
           try {
-            // Clone and replace the <ins> element to reset AdSense state
             const oldIns = treasuryAd.querySelector("ins.adsbygoogle");
             if (oldIns) {
               const newIns = oldIns.cloneNode(true);
@@ -3136,40 +3110,42 @@
       }
     });
     
-    // --- Google AdSense Compliant 60-Second Treasury Ad Refresher ---
+    // --- Google AdSense Compliant 30-Second Treasury Ad Refresher ---
     function initTreasuryAdRefresher() {
       const adContainer = el("treasury-ad-container");
       if (!adContainer) return;
 
-      const REFRESH_INTERVAL_MS = 30000; // Strictly 30-second compliant interval (was 60s)
+      const REFRESH_INTERVAL_MS = 30000;
       let lastAdRefreshTime = 0;
 
       function refreshAd() {
         if (document.hidden) return;
-        // Don't push if container is hidden (e.g. buy-mode or birds-eye)
         if (adContainer.offsetParent === null) return;
-        // Don't push if buy-mode is active (buy-mode ad owns the slot)
         if (document.body.classList.contains("buy-mode")) return;
 
         try {
-          // Clone and replace the <ins> element to reset AdSense state so it processes the push
+          // Clone and replace the <ins> element to reset AdSense state
           const oldIns = adContainer.querySelector("ins.adsbygoogle");
           if (oldIns) {
             const newIns = oldIns.cloneNode(true);
+            // Ensure data attributes survive the clone (some browsers strip them)
+            newIns.setAttribute("data-ad-client", "ca-pub-5972331036113330");
+            newIns.setAttribute("data-ad-slot", "4287691766");
+            newIns.style.cssText = "display:inline-block;width:320px;height:50px";
             adContainer.replaceChild(newIns, oldIns);
           }
           (window.adsbygoogle = window.adsbygoogle || []).push({});
           lastAdRefreshTime = Date.now();
-          console.log("[AdSense] Refreshed banner successfully.");
+          console.log("[AdSense] Treasury banner refreshed.");
         } catch (e) {
           console.warn("[AdSense] Refresh notice:", e);
         }
       }
 
-      // Delay initial push by 3 seconds to let DOM settle and AdSense SDK load
-      setTimeout(() => { refreshAd(); }, 3000);
-      // Retry after 8 seconds in case SDK was slow to load
-      setTimeout(() => { refreshAd(); }, 8000);
+      // Initial push — wait 5 seconds for AdSense SDK to fully load
+      setTimeout(() => { refreshAd(); }, 5000);
+      // Retry at 10s in case SDK was slow
+      setTimeout(() => { refreshAd(); }, 10000);
 
       // 30-Second Refresh Ticker
       setInterval(() => {
@@ -3179,7 +3155,7 @@
         }
       }, REFRESH_INTERVAL_MS);
 
-      // Refresh when waking up if 30 seconds have elapsed
+      // Refresh when waking up from background
       document.addEventListener("visibilitychange", () => {
         if (!document.hidden && (Date.now() - lastAdRefreshTime >= REFRESH_INTERVAL_MS)) {
           refreshAd();

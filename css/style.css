@@ -3334,30 +3334,6 @@ html,body{
 }
 
 /* --- Buy Land Mode Ad Banner --- */
-.buy-mode-ad {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 56px;
-  background: rgba(10, 15, 24, 0.98);
-  border-top: 1px solid rgba(255, 43, 67, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 25;
-  overflow: hidden;
-  box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.8);
-}
-
-.buy-mode-ad.hidden {
-  display: none;
-}
-
-.buy-mode-ad ins.adsbygoogle {
-  background: transparent !important;
-}
-
 .territory-pill.hidden {
   display: none;
 }
@@ -6687,7 +6663,6 @@ body.birds-eye-mode #multiplier-btn,
 body.birds-eye-mode #weekly-pool-hud-btn,
 body.birds-eye-mode #buy-mode-banner,
 body.birds-eye-mode #territory-pill,
-body.birds-eye-mode #buy-mode-ad-container,
 body.birds-eye-mode #landlord-pill,
 body.birds-eye-mode #treasury-ad-container {
   display: none !important;
