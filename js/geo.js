@@ -122,19 +122,6 @@ const Geo = (() => {
     "Wisconsin":"WI","Wyoming":"WY","District of Columbia":"DC"
   };
 
-  // Known major cities that often swallow enclaves — if suburb/neighbourhood
-  // is more specific, prefer it over the city field for enclave detection.
-  const MAJOR_CITIES = new Set([
-    "phoenix", "scottsdale", "mesa", "chandler", "glendale", "tempe",
-    "los angeles", "new york", "chicago", "houston", "phoenixville",
-    "kansas city", "san antonio", "san diego", "dallas", "austin",
-    "jacksonville", "fort worth", "columbus", "charlotte", "indianapolis",
-    "san francisco", "seattle", "denver", "boston", "nashville",
-    "portland", "las vegas", "miami", "atlanta", "detroit",
-    "minneapolis", "tampa", "orlando", "st. louis", "sacramento",
-    "pittsburgh", "cincinnati", "austin", "raleigh", "memphis",
-  ]);
-
   async function getTerritoryInfo(lat, lon) {
     const key = `${lat.toFixed(4)}_${lon.toFixed(4)}`;
     if (territoryCache[key]) return territoryCache[key];
@@ -147,28 +134,9 @@ const Geo = (() => {
       const data = await res.json();
       const addr = data.address || {};
 
-      // Priority: most specific → least specific
-      // For enclaves (e.g. Paradise Valley inside Phoenix), suburb/town/neighbourhood
-      // are often more accurate than the city field.
-      let city = addr.city || "";
-      const town = addr.town || "";
-      const village = addr.village || "";
-      const municipality = addr.municipality || "";
-      const suburb = addr.suburb || "";
-      const neighbourhood = addr.neighbourhood || "";
-
-      // If city is a known major metro, check for a more specific enclave
-      if (city && MAJOR_CITIES.has(city.toLowerCase())) {
-        // Prefer town > municipality > suburb > neighbourhood for enclaves
-        const enclave = town || municipality || suburb || neighbourhood;
-        if (enclave && enclave.toLowerCase() !== city.toLowerCase()) {
-          city = enclave;
-        }
-      }
-
-      // Fallback chain if city is still empty
-      if (!city) city = town || village || municipality || suburb || neighbourhood || addr.county || "";
-
+      // Standard Nominatim hierarchy: trust the address breakdown
+      // city field is the administrative boundary — most accurate for territory
+      const city = addr.city || addr.town || addr.village || addr.municipality || addr.county || "";
       const rawState = addr.state || "";
       const stateCode = rawState ? (US_STATES[rawState] || (rawState.length === 2 ? rawState.toUpperCase() : rawState)) : "";
       const country = addr.country || "";
