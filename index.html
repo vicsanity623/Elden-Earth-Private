@@ -478,14 +478,6 @@
     <span class="territory-text" id="territory-text">Scanning location...</span>
   </div>
 
-  <!-- Buy Land Mode Ad Banner -->
-  <div id="buy-mode-ad-container" class="buy-mode-ad hidden">
-    <ins class="adsbygoogle"
-         style="display:inline-block;width:320px;height:50px"
-         data-ad-client="ca-pub-5972331036113330"
-         data-ad-slot="4287691766"></ins>
-  </div>
-
   <!-- Bottom bar with Community Chat Button -->
   <div id="bottombar">
     <button id="recenter-btn" class="round-btn" aria-label="Reset North">🧭</button>
@@ -498,13 +490,16 @@
     </button>
   </div>
 
-  <!-- Game Treasury Bottom Ad Banner (320x50 Mobile Strip with 60s Auto-Refresh) -->
+  <!-- Game Treasury Bottom Ad Banner (Loaded First & Visible on Boot!) -->
   <div id="treasury-ad-container" class="treasury-ad-container">
     <ins class="adsbygoogle"
          style="display:inline-block;width:320px;height:50px"
          data-ad-client="ca-pub-5972331036113330"
          data-ad-slot="4287691766"></ins>
   </div>
+
+  <!-- Buy Land Mode Ad Banner (Empty on boot, injected dynamically by JS!) -->
+  <div id="buy-mode-ad-container" class="buy-mode-ad hidden"></div>
 </div>
 
 

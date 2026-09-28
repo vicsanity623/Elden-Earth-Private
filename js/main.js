@@ -2891,27 +2891,20 @@
       buyBanner?.classList.remove("hidden");
       Grid.setBuyMode(true, currentPos);
 
-      // Show buy-mode ad banner (dynamically create ins to avoid slot conflict with treasury ad)
+      // Show buy-mode ad banner safely
       const buyModeAd = el("buy-mode-ad-container");
       if (buyModeAd) {
         buyModeAd.classList.remove("hidden");
-        // Only create ins if not already present
-        if (!buyModeAd.querySelector("ins.adsbygoogle")) {
-          const ins = document.createElement("ins");
-          ins.className = "adsbygoogle";
-          ins.style.cssText = "display:inline-block;width:320px;height:50px";
-          ins.setAttribute("data-ad-client", "ca-pub-5972331036113330");
-          ins.setAttribute("data-ad-slot", "4287691766");
-          buyModeAd.appendChild(ins);
-          try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
-        }
+        // Completely recreate the tag so Google knows it's a fresh impression
+        buyModeAd.innerHTML = `<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-5972331036113330" data-ad-slot="4287691766"></ins>`;
+        try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
       }
 
       // 1. Lock camera strictly to 2D Top-Down View (minPitch = 0, maxPitch = 0)
       map.setMinPitch(0);
       map.setMaxPitch(0); // Physically impossible to tilt into 3D!
 
-      // 2. Wide framing — whole 75m reach circle visible at once (Atlas Earth style)
+      // 2. Wide framing — whole 75m reach circle visible at once
       map.setMinZoom(17.5);
       map.setMaxZoom(20.0);
 
@@ -2930,24 +2923,23 @@
       buyBanner?.classList.add("hidden");
       Grid.setBuyMode(false);
 
-      // Hide buy-mode ad banner and remove ins element to free the slot for treasury ad
+      // Hide buy-mode ad banner and clear memory
       const buyModeAd = el("buy-mode-ad-container");
       if (buyModeAd) {
         buyModeAd.classList.add("hidden");
-        // Remove the ins element so treasury ad can use the slot
-        const ins = buyModeAd.querySelector("ins.adsbygoogle");
-        if (ins) ins.remove();
+        buyModeAd.innerHTML = ""; // Destroys the ad to free up Google's queue
       }
 
-      // Re-push treasury ad now that the slot is free
+      // Re-push treasury ad instantly now that the screen is clear
       setTimeout(() => {
         const treasuryAd = el("treasury-ad-container");
-        if (treasuryAd && treasuryAd.offsetParent !== null && !document.body.classList.contains("buy-mode")) {
+        if (treasuryAd && !document.body.classList.contains("buy-mode")) {
+          treasuryAd.innerHTML = `<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-5972331036113330" data-ad-slot="4287691766"></ins>`;
           try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
         }
       }, 500);
 
-      // 1. Restore normal 3D tilt limits (Allows 0° to 70° cinematic tilt)
+      // 1. Restore normal 3D tilt limits
       map.setMinPitch(0);
       map.setMaxPitch(70);
 
@@ -3133,43 +3125,40 @@
       const adContainer = el("treasury-ad-container");
       if (!adContainer) return;
 
-      const REFRESH_INTERVAL_MS = 30000; // Strictly 30-second compliant interval (was 60s)
+      const REFRESH_INTERVAL_MS = 60000; // 🚨 MUST be 60s to prevent Google AdSense permanent ban!
       let lastAdRefreshTime = Date.now();
 
       function refreshAd() {
-        if (document.hidden) return;
-        // Don't push if container is hidden (buy-mode or birds-eye)
-        if (adContainer.offsetParent === null) return;
-        if (document.body.classList.contains("buy-mode")) return;
+        // Do not refresh treasury ad if phone is asleep OR if player is in Buy Land Mode!
+        if (document.hidden || document.body.classList.contains("buy-mode")) return;
 
         try {
-          const ins = adContainer.querySelector("ins.adsbygoogle");
-          if (ins) {
-             (window.adsbygoogle = window.adsbygoogle || []).push({});
-             lastAdRefreshTime = Date.now();
-             console.log("[AdSense] Refreshed banner successfully.");
-          }
+          // SPA Safe Refresh: Completely destroy and recreate the tag to prevent Google TagError
+          adContainer.innerHTML = `<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-5972331036113330" data-ad-slot="4287691766"></ins>`;
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          lastAdRefreshTime = Date.now();
+          console.log("[AdSense] Refreshed treasury banner successfully.");
         } catch (e) {
           console.warn("[AdSense] Refresh notice:", e);
         }
       }
 
-      // Initial push — short delay so AdSense SDK can load after DOM
-      setTimeout(() => { refreshAd(); }, 2000);
+      // Initial push for ALL ad slots currently sitting in the HTML on boot
+      try {
+        const adSlots = document.querySelectorAll('ins.adsbygoogle');
+        adSlots.forEach(() => {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        });
+      } catch (e) {}
 
-      // 30-Second Refresh Ticker
+      // 60-Second Refresh Ticker
       setInterval(() => {
-        const now = Date.now();
-        if (now - lastAdRefreshTime >= REFRESH_INTERVAL_MS) {
-          refreshAd();
-        }
+        if (Date.now() - lastAdRefreshTime >= REFRESH_INTERVAL_MS) refreshAd();
       }, REFRESH_INTERVAL_MS);
 
-      // Refresh when waking up if 30 seconds have elapsed
+      // Refresh when waking up phone
       document.addEventListener("visibilitychange", () => {
-        if (!document.hidden && (Date.now() - lastAdRefreshTime >= REFRESH_INTERVAL_MS)) {
-          refreshAd();
-        }
+        if (!document.hidden && (Date.now() - lastAdRefreshTime >= REFRESH_INTERVAL_MS)) refreshAd();
       });
     }
 
