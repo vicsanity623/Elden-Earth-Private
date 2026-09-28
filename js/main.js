@@ -3138,12 +3138,13 @@
 
       function refreshAd() {
         if (document.hidden) return;
+        // Don't push if container is hidden (buy-mode or birds-eye)
+        if (adContainer.offsetParent === null) return;
+        if (document.body.classList.contains("buy-mode")) return;
 
         try {
           const ins = adContainer.querySelector("ins.adsbygoogle");
           if (ins) {
-             // Google documentation recommends clearing the innerHTML 
-             // and pushing to the global queue again
              (window.adsbygoogle = window.adsbygoogle || []).push({});
              lastAdRefreshTime = Date.now();
              console.log("[AdSense] Refreshed banner successfully.");
@@ -3153,10 +3154,8 @@
         }
       }
 
-      // Initial push on game load
-      try {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (e) {}
+      // Initial push — short delay so AdSense SDK can load after DOM
+      setTimeout(() => { refreshAd(); }, 2000);
 
       // 30-Second Refresh Ticker
       setInterval(() => {

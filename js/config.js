@@ -4,7 +4,7 @@
 // ============================================================
 const CONFIG = {
   // --- Game Version (bump on every patch to auto-wipe stale localStorage) ---
-  GAME_VERSION: "0.1.10.93b",
+  GAME_VERSION: "0.1.10.95b",
 
   // --- Realm Server Epoch ---
   // Bump this timestamp whenever you intentionally wipe the Firestore database.

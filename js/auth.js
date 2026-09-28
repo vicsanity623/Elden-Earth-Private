@@ -21,12 +21,6 @@ const Auth = (() => {
     }
   }
 
-  async function checkEmailAllowed(email) {
-    // Whitelist check removed — game is open to all Google sign-in users.
-    // Bad actors are handled by the ban system (Firestore banned_users).
-    return true;
-  }
-
   // --- RICKROLL BAN GATE ---
   // Instant fullscreen takeover with YouTube embed. Autoplay muted (browser
   // requirement), then on ANY tap unmute at max volume with CSS distortion.
@@ -138,7 +132,7 @@ const Auth = (() => {
   }
 
   // Clear false-positive ban markers left by the old buggy code.
-  // Only runs AFTER the whitelist check passes, so legitimate bans are untouched.
+  // Only runs AFTER auth checks pass, so legitimate bans are untouched.
   function clearStaleBanMarkers() {
     try {
       // Remove the primary ban integrity marker
@@ -222,19 +216,7 @@ const Auth = (() => {
       return true;
     }
 
-    // 1. SERVER-SIDE WHITELIST CHECK (primary — emails never in client code)
-    const isAllowed = await checkEmailAllowed(emailLower);
-    if (!isAllowed) {
-      console.warn(`[Auth] ACCESS DENIED: ${uid} (${emailLower}) — not on server whitelist`);
-      storeBanIntegrity(uid, emailLower);
-      showCWOODBanScreen();
-      return true;
-    }
-
-    // Clear stale ban markers for whitelisted users (false-positive cleanup)
-    clearStaleBanMarkers();
-
-    // 2. BAN EVASION PATTERN DETECTION (throwaway emails, multi-account abuse)
+    // 1. BAN EVASION PATTERN DETECTION (throwaway emails, multi-account abuse)
     if (detectBanEvasionPatterns(uid, emailLower)) {
       console.warn(`[Auth] BAN EVASION detected: ${uid} (${emailLower})`);
       storeBanIntegrity(uid, emailLower);
@@ -242,7 +224,7 @@ const Auth = (() => {
       return true;
     }
 
-    // 3. Firestore banned_users collection check (belt-and-suspenders)
+    // 2. Firestore banned_users collection check (belt-and-suspenders)
     try {
       const firestore = Store.getDb();
       if (!firestore) return false;
@@ -409,7 +391,7 @@ const Auth = (() => {
   }
 
   // ==================== FULLY VERIFIED PLAYER LIST ====================
-  // Players who have completed auth + whitelist + age verification get added here.
+  // Players who have completed auth + age verification get added here.
   // On return visits, they skip the slow checks for near-instant login.
   const FULLY_VERIFIED_KEY = "eldenEarth.fullyVerified";
 
@@ -731,9 +713,14 @@ const Auth = (() => {
               signinScreen.style.pointerEvents = "none";
             }
 
+            // --- CLEAR STALE BAN MARKERS ON EVERY LOGIN ---
+            // Previous code stored false-positive ban markers that permanently blocked
+            // players even on new tabs. Clear them immediately for all players.
+            clearStaleBanMarkers();
+
             // --- FAST PATH: Previously verified player ---
             // If this player has already completed full auth + age verification,
-            // skip the slow whitelist/ban checks and go straight to cloud sync.
+            // skip the slow checks and go straight to cloud sync.
             const isFullyVerified = isPlayerFullyVerified(user.uid);
             if (isFullyVerified) {
               console.log(`[Auth] Fast path: ${user.uid} already fully verified`);
@@ -747,22 +734,7 @@ const Auth = (() => {
               return;
             }
 
-            // --- EARLY WHITELIST CHECK: Block non-allowed emails BEFORE any cloud sync ---
             const userEmail = String(user.email || "").toLowerCase().trim();
-            console.log(`[Auth] Early whitelist check for: ${userEmail}`);
-            const isAllowed = await checkEmailAllowed(userEmail);
-            console.log(`[Auth] Whitelist result for ${userEmail}: ${isAllowed}`);
-            if (!isAllowed) {
-              console.warn(`[Auth] ACCESS DENIED (early): ${user.uid} (${userEmail})`);
-              storeBanIntegrity(user.uid, userEmail);
-              showCWOODBanScreen();
-              return; // STOP — no cloud sync, no save, nothing
-            }
-
-            // --- CLEAR STALE BAN MARKERS FOR WHITELISTED USERS ---
-            // The old buggy code stored false-positive ban markers. Clear them now
-            // so whitelisted players aren't permanently locked out.
-            clearStaleBanMarkers();
 
             // --- EARLY DEVICE BAN EVASION CHECK ---
             const deviceBanned = isDevicePreviouslyBanned();
