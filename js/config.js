@@ -4,7 +4,7 @@
 // ============================================================
 const CONFIG = {
   // --- Game Version (bump on every patch to auto-wipe stale localStorage) ---
-  GAME_VERSION: "0.1.10.91b",
+  GAME_VERSION: "0.1.10.92b",
 
   // --- Realm Server Epoch ---
   // Bump this timestamp whenever you intentionally wipe the Firestore database.
@@ -45,7 +45,7 @@ const CONFIG = {
   DIAMOND_SPAWN_CHECK_MS: 1 * 60 * 1000, // One diamond every 2 minutes
   DIAMOND_INNER_COOLDOWN_MS: 5 * 60 * 1000, // 8-Minute cooldown between inner circle waves
   DIAMOND_IDLE_TIMEOUT_MS: 120 * 60 * 1000, // Pause spawning after 2 hour still
-  DIAMOND_MOVEMENT_THRESHOLD_METERS: 10, // Ignore GPS drift smaller than 10m
+  DIAMOND_MOVEMENT_THRESHOLD_METERS: 50, // Ignore GPS drift smaller than 10m
   DIAMOND_LIFETIME_MS: 30 * 60 * 1000,  // 25 minutes
 
   // --- Diamond Extractor ---

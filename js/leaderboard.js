@@ -231,6 +231,12 @@ const Leaderboard = (() => {
     lastFetchTime = 0;
   }
 
+  function invalidateLiveTerritory() {
+    _liveTerritoryCache = null;
+    _liveTerritoryLat = 0;
+    _liveTerritoryLon = 0;
+  }
+
   async function fetchRankings(forceRefresh = false) {
     const now = Date.now();
     if (!forceRefresh && cachedData && (now - lastFetchTime < CACHE_TTL_MS)) {
@@ -483,8 +489,72 @@ const Leaderboard = (() => {
     return cachedData;
   }
 
-  // Determine local player's primary territory scopes with neutral fallbacks
-  function getPlayerLocalTerritory(data) {
+  // Live GPS territory cache — avoids re-calling Nominatim on every render
+  let _liveTerritoryCache = null;
+  let _liveTerritoryLat = 0;
+  let _liveTerritoryLon = 0;
+  const LIVE_TERRITORY_MIN_MOVE = 200; // re-resolve after 200m movement
+
+  // Determine local player's primary territory scopes using live GPS position.
+  // Falls back to plot-based detection if GPS is unavailable.
+  function getPlayerLocalTerritory() {
+    // Try live GPS first
+    const pos = (typeof Grid !== "undefined" && Grid.getPlayerPosition)
+      ? Grid.getPlayerPosition()
+      : (typeof window !== "undefined" && window.getPlayerPosition ? window.getPlayerPosition() : null);
+
+    if (pos && pos.lat && pos.lon) {
+      // Only re-resolve if player moved significantly (avoid Nominatim thrash)
+      if (_liveTerritoryCache && typeof Geo !== "undefined" && Geo.haversine) {
+        const dist = Geo.haversine(_liveTerritoryLat, _liveTerritoryLon, pos.lat, pos.lon);
+        if (dist < LIVE_TERRITORY_MIN_MOVE) {
+          return _liveTerritoryCache;
+        }
+      }
+
+      // Resolve territory from live GPS (Geo.getTerritoryInfo is async but cached)
+      if (typeof Geo !== "undefined" && Geo.getTerritoryInfo) {
+        // Use cached territory from Geo module (it has its own internal cache)
+        const geoResult = Geo.getTerritoryInfo(pos.lat, pos.lon);
+        // Handle both sync (cached) and async (fresh fetch) results
+        if (geoResult && typeof geoResult.then === "function") {
+          // Async — return last known while waiting, trigger refresh after
+          geoResult.then(info => {
+            if (info) {
+              _liveTerritoryCache = buildTerritoryResult(info.city, info.state, info.country);
+              _liveTerritoryLat = pos.lat;
+              _liveTerritoryLon = pos.lon;
+            }
+          }).catch(() => {});
+          if (_liveTerritoryCache) return _liveTerritoryCache;
+        } else if (geoResult) {
+          // Sync (already cached in Geo module)
+          _liveTerritoryCache = buildTerritoryResult(geoResult.city, geoResult.state, geoResult.country);
+          _liveTerritoryLat = pos.lat;
+          _liveTerritoryLon = pos.lon;
+          return _liveTerritoryCache;
+        }
+      }
+    }
+
+    // Fallback: use player's first plot location (legacy behavior)
+    return getPlotBasedTerritory();
+  }
+
+  function buildTerritoryResult(city, state, country) {
+    const normalizedState = normalizeState(state, city);
+    const normalizedCountry = normalizeCountry(country, city);
+    return {
+      city: city || "Local City",
+      state: normalizedState || "Local State",
+      country: normalizedCountry || "United States 🇺🇸",
+      cityKey: cleanTerritoryKey(city),
+      stateKey: cleanTerritoryKey(normalizedState),
+      countryKey: cleanTerritoryKey(normalizedCountry),
+    };
+  }
+
+  function getPlotBasedTerritory() {
     const state = Store.get();
     const myId = state.player?.id;
     const allPlots = (typeof Grid !== "undefined" && Grid.getAllPlots) ? Grid.getAllPlots() : {};
@@ -520,7 +590,7 @@ const Leaderboard = (() => {
     const fragment = document.createDocumentFragment();
     const state = Store.get();
     const myId = state.player?.id;
-    const local = getPlayerLocalTerritory(data);
+    const local = getPlayerLocalTerritory();
 
     let filteredPlayers = [...data.players];
 
@@ -830,5 +900,5 @@ const Leaderboard = (() => {
     };
   }
 
-  return { init, open, render, fetchRankings, invalidateCache, awardTerritoryDividends, initDividendMailbox, getLocalTerritoryRulers };
+  return { init, open, render, fetchRankings, invalidateCache, invalidateLiveTerritory, awardTerritoryDividends, initDividendMailbox, getLocalTerritoryRulers, getPlayerLocalTerritory };
 })();

@@ -945,6 +945,10 @@ const Grid = (() => {
     playerCoords = { lat, lon };
   }
 
+  function getPlayerPosition() {
+    return playerCoords ? { ...playerCoords } : null;
+  }
+
   function setBuyMode(active, coords = null) {
     isBuyMode = active;
     if (coords) playerCoords = coords;
@@ -984,6 +988,10 @@ const Grid = (() => {
           }
         });
         render();
+        // Invalidate leaderboard cache when plots change so mayorship updates in realtime
+        if (typeof Leaderboard !== "undefined" && Leaderboard.invalidateCache) {
+          Leaderboard.invalidateCache();
+        }
       }, (err) => console.warn("[Multiplayer] Sync error:", err));
     } catch (err) {
       console.warn("[Multiplayer] Listener error:", err);
@@ -1070,5 +1078,5 @@ const Grid = (() => {
     scheduleRender();
   }
 
-  return { init, render, promptBuyTile, executeBuy, getAllPlots, setBuyMode, setGlobalPlot, setPlayerPosition };
+  return { init, render, promptBuyTile, executeBuy, getAllPlots, setBuyMode, setGlobalPlot, setPlayerPosition, getPlayerPosition };
 })();

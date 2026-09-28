@@ -8,6 +8,7 @@
   let currentPos = _savedStore?.lastDiamondPlayerPosition || null;
   let toastTimer = null;
   let pulseAnimId = null;
+  let _lastKnownCity = null;
 
   // --- AUTOMATION / HEADLESS DETECTION ---
   function detectAutomation() {
@@ -968,6 +969,31 @@
       }
     }
 
+    // Realtime city boundary detection — refresh leaderboard when player enters a new city
+    if (typeof Geo !== "undefined" && Geo.getTerritoryInfo) {
+      Geo.getTerritoryInfo(currentPos.lat, currentPos.lon).then(info => {
+        if (!info || !info.city) return;
+        const cityKey = info.city.replace(/[\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}\uFE0F]/gu, "").trim().toLowerCase();
+        if (cityKey && cityKey !== _lastKnownCity) {
+          _lastKnownCity = cityKey;
+          // Invalidate leaderboard caches so city/state tabs re-scope to new location
+          if (typeof Leaderboard !== "undefined") {
+            Leaderboard.invalidateLiveTerritory();
+            Leaderboard.invalidateCache();
+            // Auto-render leaderboard if modal is currently open
+            const lbModal = document.getElementById("leaderboard-modal");
+            if (lbModal && !lbModal.classList.contains("hidden")) {
+              Leaderboard.open();
+            }
+          }
+          // Immediately update the landlord pill to reflect new city
+          if (typeof updateLandlordPill === "function") {
+            updateLandlordPill();
+          }
+        }
+      }).catch(() => {});
+    }
+
     // 2. Camera Follow Deadzone: Only glide camera if player actually moved > 0.8 meters
     const dist = lastCameraCenter ? Geo.haversine(lastCameraCenter.lat, lastCameraCenter.lon, currentPos.lat, currentPos.lon) : 999;
 
@@ -1610,20 +1636,11 @@
         return;
       }
 
-      // Get territory info from the player's own plots
-      const allPlots = (typeof Grid !== "undefined" && Grid.getAllPlots) ? Grid.getAllPlots() : {};
-      const state = Store.get();
-      const myId = state?.player?.id;
-      let myCity = "", myState = "", myCountry = "";
-      for (const tid in allPlots) {
-        const p = allPlots[tid];
-        if (p.ownerId === myId) {
-          if (p.city) myCity = p.city;
-          if (p.state) myState = p.state;
-          if (p.country) myCountry = p.country;
-          break;
-        }
-      }
+      // Get territory from live GPS position (not from plots)
+      const local = Leaderboard.getPlayerLocalTerritory();
+      const myCity = local.city;
+      const myState = local.state;
+      const myCountry = local.country;
 
       if (!myCity && !myState && !myCountry) {
         pill.classList.add("hidden");
@@ -1651,6 +1668,7 @@
       // Set ruler avatar (large circle)
       if (ruler) {
         let rulerAvatar = "👤";
+        const allPlots = (typeof Grid !== "undefined" && Grid.getAllPlots) ? Grid.getAllPlots() : {};
         for (const tid in allPlots) {
           const p = allPlots[tid];
           if (p.ownerId === ruler.ownerId && p.avatar) {
@@ -2925,7 +2943,15 @@
       setTimeout(() => {
         const treasuryAd = el("treasury-ad-container");
         if (treasuryAd && treasuryAd.offsetParent !== null && !document.body.classList.contains("buy-mode")) {
-          try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+          try {
+            // Clone and replace the <ins> element to reset AdSense state
+            const oldIns = treasuryAd.querySelector("ins.adsbygoogle");
+            if (oldIns) {
+              const newIns = oldIns.cloneNode(true);
+              treasuryAd.replaceChild(newIns, oldIns);
+            }
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          } catch (e) {}
         }
       }, 500);
 
@@ -3126,23 +3152,24 @@
         if (document.body.classList.contains("buy-mode")) return;
 
         try {
-          const ins = adContainer.querySelector("ins.adsbygoogle");
-          if (ins) {
-             // Google documentation recommends clearing the innerHTML 
-             // and pushing to the global queue again
-             (window.adsbygoogle = window.adsbygoogle || []).push({});
-             lastAdRefreshTime = Date.now();
-             console.log("[AdSense] Refreshed banner successfully.");
+          // Clone and replace the <ins> element to reset AdSense state so it processes the push
+          const oldIns = adContainer.querySelector("ins.adsbygoogle");
+          if (oldIns) {
+            const newIns = oldIns.cloneNode(true);
+            adContainer.replaceChild(newIns, oldIns);
           }
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          lastAdRefreshTime = Date.now();
+          console.log("[AdSense] Refreshed banner successfully.");
         } catch (e) {
           console.warn("[AdSense] Refresh notice:", e);
         }
       }
 
       // Delay initial push by 3 seconds to let DOM settle and AdSense SDK load
-      setTimeout(() => {
-        refreshAd();
-      }, 3000);
+      setTimeout(() => { refreshAd(); }, 3000);
+      // Retry after 8 seconds in case SDK was slow to load
+      setTimeout(() => { refreshAd(); }, 8000);
 
       // 30-Second Refresh Ticker
       setInterval(() => {
@@ -3773,6 +3800,7 @@
   // Expose for leaderboard cross-module access
   window.updatePlayerInfoModal = updatePlayerInfoModal;
   window.openModal = openModal;
+  window.getPlayerPosition = () => currentPos ? { lat: currentPos.lat, lon: currentPos.lon } : null;
 
   // ---------------- Boot ----------------
   document.addEventListener("DOMContentLoaded", () => {
