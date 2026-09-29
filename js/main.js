@@ -530,16 +530,6 @@
     // Render friends tab content
     if (typeof Friends !== "undefined" && !isOtherPlayer) {
       Friends.renderFriendsTab();
-      // One-time: claim any pending referral bonuses
-      if (!window._referralBonusesClaimed && typeof Referrals !== "undefined") {
-        window._referralBonusesClaimed = true;
-        Referrals.claimReferralBonuses();
-      }
-      // One-time: claim any pending friend gifts
-      if (!window._friendGiftsClaimed && typeof Friends !== "undefined") {
-        window._friendGiftsClaimed = true;
-        Friends.claimDailyGifts();
-      }
     } else if (isOtherPlayer) {
       // Show relationship-aware friend UI for other players (not a blind "send request" every time)
       const friendsPanel = document.querySelector('[data-pi-panel="friends"]');
@@ -1890,10 +1880,6 @@
     const pName = (state?.player?.name || "").toLowerCase();
 
     updateTopbar();
-    // Automatically claim all territory royalties deposited while offline!
-    if (typeof Leaderboard !== "undefined" && Leaderboard.claimPendingDividends) {
-      setTimeout(() => Leaderboard.claimPendingDividends(), 2500);
-    }
 
     // High-Performance Ticker: Calculates exact delta & saves locally without network thrashing
     let lastTickTime = Date.now();

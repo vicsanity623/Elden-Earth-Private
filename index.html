@@ -282,7 +282,7 @@
     <div class="hero-balance-card" id="hero-balance-card">
       <div class="hero-top-line">
         <div class="hero-brand-title">
-          <span class="hero-brand-gem">◆</span> ELDEN EARTH <span class="hero-version-tag">0.1.11.01b</span>
+          <span class="hero-brand-gem">◆</span> ELDEN EARTH <span class="hero-version-tag">0.1.11.02b</span>
         </div>
         <div id="boost-timer-badge" class="boost-timer-badge hidden">⚡ 30X BOOST <span id="boost-countdown">00:00:00</span></div>
       </div>
@@ -480,6 +480,10 @@
 
   <!-- Bottom bar with Community Chat Button -->
   <div id="bottombar">
+    <button id="royalties-btn" class="round-btn royalties-btn hidden" aria-label="Pending Royalties">
+      👑
+      <span id="royalties-badge" class="royalties-badge"></span>
+    </button>
     <button id="recenter-btn" class="round-btn" aria-label="Reset North">🧭</button>
     <button id="buy-land-mode-btn" class="btn btn-buy-land">Buy Land</button>
     <button id="earn-btn" class="btn btn-earn">Earn</button>
@@ -1555,6 +1559,20 @@
     <button class="btn btn-primary" style="margin-top:14px;" onclick="this.closest('.modal').classList.add('hidden');window.location.href='/';">
       🔄 Go to Home
     </button>
+  </div>
+</div>
+
+<!-- ===================== ROYALTIES MODAL ===================== -->
+<div id="royalties-modal" class="modal hidden">
+  <div class="modal-card royalties-modal-card">
+    <div class="royalties-header">
+      <span class="royalties-header-icon">👑</span>
+      <h2>Pending Royalties</h2>
+      <button class="close-btn" data-close="royalties-modal">✕</button>
+    </div>
+    <div id="royalties-summary" class="royalties-summary">No pending royalties</div>
+    <div id="royalties-list" class="royalties-list"></div>
+    <button id="royalties-claim-all-btn" class="btn btn-primary royalties-claim-all-btn" disabled>Nothing to Claim</button>
   </div>
 </div>
 

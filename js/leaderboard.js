@@ -800,8 +800,43 @@ const Leaderboard = (() => {
     }
   }
 
-  // Live Real-Time Royalties Listener
+  // Live Real-Time Royalties Listener — tracks pending count ONLY, never auto-claims
   let dividendUnsubscribe = null;
+  window._pendingDividendsCount = 0;
+  window._pendingDividendsTotal = 0;
+  window._pendingReferralBonusesCount = 0;
+  window._pendingReferralBonusesTotal = 0;
+
+  function updateRoyaltiesButton() {
+    const btn = document.getElementById("royalties-btn");
+    const badge = document.getElementById("royalties-badge");
+    if (!btn) return;
+    const totalPending = (window._pendingDividendsCount || 0) + (window._pendingReferralBonusesCount || 0);
+    const totalEB = (window._pendingDividendsTotal || 0) + (window._pendingReferralBonusesTotal || 0);
+    if (totalPending > 0) {
+      btn.classList.remove("hidden");
+      if (badge) badge.textContent = totalEB > 0 ? `+${totalEB} EB` : `${totalPending}`;
+    } else {
+      btn.classList.add("hidden");
+    }
+  }
+
+  async function fetchPendingReferralBonuses() {
+    const db = Store.getDb();
+    const myId = Store.get()?.player?.id;
+    if (!db || !myId) return;
+    try {
+      const snap = await db.collection("referral_bonuses")
+        .where("toId", "==", myId)
+        .where("claimed", "==", false)
+        .get();
+      let total = 0;
+      snap.forEach(doc => { total += Number(doc.data()?.amount) || 0; });
+      window._pendingReferralBonusesCount = snap.size;
+      window._pendingReferralBonusesTotal = total;
+      updateRoyaltiesButton();
+    } catch (e) {}
+  }
 
   function initDividendMailbox() {
     const state = Store.get();
@@ -818,41 +853,173 @@ const Leaderboard = (() => {
       dividendUnsubscribe = db.collection("dividends")
         .where("recipientId", "==", myId)
         .where("claimed", "==", false)
-        .onSnapshot(async (snapshot) => {
-          if (!snapshot || snapshot.empty) return;
-
-          let totalEarned = 0;
-          const batch = db.batch();
-
-          snapshot.forEach((doc) => {
-            const d = doc.data();
-            totalEarned += (Number(d.amount) || 2);
-            batch.update(doc.ref, { claimed: true });
-          });
-
-          if (totalEarned > 0) {
-            const s = Store.get();
-            s.eb = (Number(s.eb) || 0) + totalEarned;
-            s.totalDividends = (Number(s.totalDividends) || 0) + totalEarned;
-            Store.save(true);
-
-            const ebStat = document.getElementById("stat-eb");
-            if (ebStat) ebStat.textContent = `${s.eb} EB`;
-
-            const divStat = document.getElementById("info-total-dividends");
-            if (divStat) divStat.textContent = `${s.totalDividends} EB`;
-
-            if (typeof window.updateTopbar === "function") window.updateTopbar();
-
-            await batch.commit();
-
-            const toastFn = window.showToast || alert;
-            toastFn(`👑 Real-Time Royalty! +${totalEarned} EB received from land claim!`, 4500);
+        .onSnapshot((snapshot) => {
+          const pendingCount = snapshot ? snapshot.size : 0;
+          let pendingTotal = 0;
+          if (snapshot) {
+            snapshot.forEach((doc) => {
+              pendingTotal += (Number(doc.data()?.amount) || 2);
+            });
           }
+          window._pendingDividendsCount = pendingCount;
+          window._pendingDividendsTotal = pendingTotal;
+          updateRoyaltiesButton();
         }, (err) => console.warn("[Dividends] Listener notice:", err));
     } catch (e) {
       console.warn("[Dividends] Init notice:", e);
     }
+    fetchPendingReferralBonuses();
+  }
+
+  async function renderRoyaltiesModal() {
+    const db = Store.getDb();
+    const myId = Store.get()?.player?.id;
+    const listEl = document.getElementById("royalties-list");
+    const summaryEl = document.getElementById("royalties-summary");
+    const claimAllBtn = document.getElementById("royalties-claim-all-btn");
+    if (!listEl || !myId) return;
+
+    let dividendItems = [];
+    let referralItems = [];
+
+    if (db) {
+      try {
+        const divSnap = await db.collection("dividends")
+          .where("recipientId", "==", myId)
+          .where("claimed", "==", false)
+          .get();
+        divSnap.forEach(doc => {
+          const d = doc.data();
+          dividendItems.push({ id: doc.id, amount: Number(d.amount) || 2, titleBadge: d.titleBadge || "Royalty", territory: d.territory || "", createdAt: d.createdAt });
+        });
+      } catch (e) {}
+
+      try {
+        const refSnap = await db.collection("referral_bonuses")
+          .where("toId", "==", myId)
+          .where("claimed", "==", false)
+          .get();
+        refSnap.forEach(doc => {
+          const d = doc.data();
+          referralItems.push({ id: doc.id, amount: Number(d.amount) || 0, fromName: d.fromName || "Referral" });
+        });
+      } catch (e) {}
+    }
+
+    const totalDivEb = dividendItems.reduce((s, i) => s + i.amount, 0);
+    const totalRefEb = referralItems.reduce((s, i) => s + i.amount, 0);
+    const totalEB = totalDivEb + totalRefEb;
+
+    if (summaryEl) {
+      summaryEl.textContent = totalEB > 0 ? `Total Pending: +${totalEB} EB` : "No pending royalties";
+    }
+    if (claimAllBtn) {
+      claimAllBtn.disabled = totalEB <= 0;
+      claimAllBtn.textContent = totalEB > 0 ? `CLAIM ALL (+${totalEB} EB)` : "Nothing to Claim";
+    }
+
+    let html = "";
+    if (dividendItems.length > 0) {
+      html += `<div class="royalty-section-title">👑 Territory Dividends</div>`;
+      dividendItems.forEach(item => {
+        html += `
+          <div class="royalty-row">
+            <div class="royalty-row-info">
+              <span class="royalty-row-title">${escapeHtml(item.titleBadge)}</span>
+              <span class="royalty-row-sub">from ${escapeHtml(item.territory)}</span>
+            </div>
+            <span class="royalty-row-amount">+${item.amount} EB</span>
+          </div>`;
+      });
+    }
+    if (referralItems.length > 0) {
+      html += `<div class="royalty-section-title">🔗 Referral Bonuses</div>`;
+      referralItems.forEach(item => {
+        html += `
+          <div class="royalty-row">
+            <div class="royalty-row-info">
+              <span class="royalty-row-title">${escapeHtml(item.fromName)}</span>
+              <span class="royalty-row-sub">referral bonus</span>
+            </div>
+            <span class="royalty-row-amount">+${item.amount} EB</span>
+          </div>`;
+      });
+    }
+    if (dividendItems.length === 0 && referralItems.length === 0) {
+      html = `<div class="royalty-empty">No pending royalties. Earn more by owning land as a ruler or referring friends!</div>`;
+    }
+
+    listEl.innerHTML = html;
+  }
+
+  async function claimAllRoyalties() {
+    const claimAllBtn = document.getElementById("royalties-claim-all-btn");
+    if (claimAllBtn) {
+      claimAllBtn.disabled = true;
+      claimAllBtn.textContent = "CLAIMING...";
+    }
+
+    let totalClaimed = 0;
+
+    // 1. Claim territory dividends + friend gifts via server
+    try {
+      const divResult = await ServerAntiCheat.claimMailbox();
+      if (divResult && divResult.claimed > 0) {
+        const s = Store.get();
+        if (typeof divResult.nextEb === "number") s.eb = divResult.nextEb;
+        if (typeof divResult.nextTotalDividends === "number") s.totalDividends = divResult.nextTotalDividends;
+        totalClaimed += (divResult.dividendsEb || 0) + (divResult.giftsEb || 0);
+        Store.save(true);
+      }
+    } catch (e) {
+      console.warn("[Royalties] Dividend claim error:", e);
+    }
+
+    // 2. Claim referral bonuses via server
+    try {
+      const refResult = await ServerAntiCheat.claimReferralBonuses();
+      if (refResult && refResult.claimed && refResult.totalClaimed > 0) {
+        const s = Store.get();
+        if (typeof refResult.nextEb === "number") s.eb = refResult.nextEb;
+        totalClaimed += refResult.totalClaimed;
+        Store.save(true);
+      }
+    } catch (e) {
+      console.warn("[Royalties] Referral claim error:", e);
+    }
+
+    // 3. Refresh pending counts
+    window._pendingDividendsCount = 0;
+    window._pendingDividendsTotal = 0;
+    window._pendingReferralBonusesCount = 0;
+    window._pendingReferralBonusesTotal = 0;
+    updateRoyaltiesButton();
+
+    // 4. Flying EB animation
+    if (totalClaimed > 0 && typeof updateTopbar === "function") updateTopbar();
+    if (totalClaimed > 0 && typeof launchFlyingEBStream === "function") {
+      const claimBtn = document.getElementById("royalties-claim-all-btn");
+      const rect = claimBtn ? claimBtn.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight / 2 };
+      launchFlyingEBStream(rect.left + rect.width / 2, rect.top, totalClaimed);
+    }
+
+    // 5. Toast + refresh modal
+    const toastFn = window.showToast || alert;
+    if (totalClaimed > 0) {
+      toastFn(`👑 Claimed ${totalClaimed} EB in royalties!`, 4500);
+      await renderRoyaltiesModal();
+    } else {
+      toastFn("No pending royalties to claim.", 3000);
+      document.getElementById("royalties-modal")?.classList.add("hidden");
+    }
+
+    if (typeof updateTopbar === "function") updateTopbar();
+  }
+
+  function openRoyaltiesModal() {
+    const modal = document.getElementById("royalties-modal");
+    if (modal) modal.classList.remove("hidden");
+    renderRoyaltiesModal();
   }
 
   async function open() {
@@ -866,6 +1033,11 @@ const Leaderboard = (() => {
   function init() {
     modal = document.getElementById("leaderboard-modal");
     document.getElementById("leaderboard-btn")?.addEventListener("click", open);
+    document.getElementById("royalties-btn")?.addEventListener("click", openRoyaltiesModal);
+    document.getElementById("royalties-claim-all-btn")?.addEventListener("click", claimAllRoyalties);
+    document.getElementById("royalties-modal")?.querySelector(".close-btn")?.addEventListener("click", () => {
+      document.getElementById("royalties-modal")?.classList.add("hidden");
+    });
     initDividendMailbox();
 
     const scopeBtns = document.querySelectorAll(".lb-scope-btn");
@@ -900,5 +1072,5 @@ const Leaderboard = (() => {
     };
   }
 
-  return { init, open, render, fetchRankings, invalidateCache, invalidateLiveTerritory, awardTerritoryDividends, initDividendMailbox, getLocalTerritoryRulers, getPlayerLocalTerritory };
+  return { init, open, render, fetchRankings, invalidateCache, invalidateLiveTerritory, awardTerritoryDividends, initDividendMailbox, getLocalTerritoryRulers, getPlayerLocalTerritory, openRoyaltiesModal, claimAllRoyalties, renderRoyaltiesModal, fetchPendingReferralBonuses, updateRoyaltiesButton };
 })();
