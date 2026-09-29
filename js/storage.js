@@ -46,7 +46,7 @@ const Store = (() => {
 
   function defaultState() {
     return {
-      player: { name: "Traveler", id: null, avatar: "🙂", model3d: "soldier", freeSpins: 0, freeSpinsNoDiamondCost: false, phoneVerified: false },
+      player: { name: "Traveler", id: null, avatar: "🙂", model3d: "soldier", freeSpins: 0, freeSpinsNoDiamondCost: false, phoneVerified: false, bonusClaimed: false },
       cash: 0,
       lifetimeRent: 0,
       eb: 0,

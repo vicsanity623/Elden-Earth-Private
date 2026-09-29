@@ -1521,6 +1521,7 @@
     if (typeof WeeklyPool !== "undefined") WeeklyPool.init();
     startIncomeLoop();
     wireUI();
+    wireTutorial();
     initLandlordPill();
 
     // --- Battery Saver & Background Sleep Controller (0% Battery in Pocket) ---
@@ -1538,6 +1539,349 @@
         }
       }
     });
+
+    // Start tutorial for new players after game is fully loaded
+    setTimeout(() => { startTutorial(); }, 1500);
+  }
+
+  // ======================== NEW PLAYER TUTORIAL ========================
+  const TUTORIAL_KEY = "eldenEarth.tutorialComplete.v1";
+
+  const TUTORIAL_STEPS = [
+    {
+      target: null,
+      title: "Welcome to Elden Earth!",
+      text: "I'm your guide. I'll walk you through the Realm so you can start claiming land and earning passive income. Let's go!",
+      position: "center",
+    },
+    {
+      target: "#hero-balance-card",
+      title: "Your Treasury",
+      text: "This is your balance. Every plot of land you own earns you passive income $/second — even while you're away!",
+      position: "below",
+    },
+    {
+      target: "#buy-land-mode-btn",
+      title: "Claim Land",
+      text: "Tap Buy Land to enter claim mode. Walk around in the real world and tap empty tiles near you to purchase plots. More plots = more income!",
+      position: "above",
+    },
+    {
+      target: "#leaderboard-btn",
+      title: "Realm Rankings",
+      text: "Check your rank against other landlords. Compete to become Mayor of your city, Governor of your state, or President of your country!",
+      position: "right",
+    },
+    {
+      target: ".player-chip",
+      title: "Your Profile",
+      text: "Tap your name and avatar here to open your profile. Change your display name and upload a custom avatar to make your mark in the Realm!",
+      position: "below",
+    },
+    {
+      target: null,
+      title: "You're All Set!",
+      text: "Here's your New Explorer Bonus: 4,000 EB + 500 Diamonds! Use them to claim your first plots and start building your empire. Welcome to the Realm!",
+      position: "center",
+      isFinal: true,
+    },
+  ];
+
+  let _tutorialStep = 0;
+  let _tutorialActive = false;
+
+  function isTutorialComplete() {
+    return localStorage.getItem(TUTORIAL_KEY) === "true";
+  }
+
+  function isNewPlayer() {
+    const state = Store.get();
+    // Existing players have plots — don't show tutorial
+    const plotCount = Object.keys(state.plots || {}).length;
+    if (plotCount > 0) return false;
+    // Check if bonus was already claimed (cloud-persisted, survives cache clear)
+    if (state.player?.bonusClaimed) return false;
+    // Check account creation time — if created more than 10 minutes ago, skip
+    const createdAt = state.player?.createdAt || 0;
+    if (createdAt && (Date.now() - createdAt > 10 * 60 * 1000)) return false;
+    return true;
+  }
+
+  function markTutorialComplete() {
+    localStorage.setItem(TUTORIAL_KEY, "true");
+  }
+
+  function startTutorial() {
+    if (isTutorialComplete()) return;
+    if (!isNewPlayer()) {
+      markTutorialComplete();
+      return;
+    }
+    _tutorialStep = 0;
+    _tutorialActive = true;
+    const overlay = el("tutorial-overlay");
+    if (overlay) overlay.classList.remove("hidden");
+    initTutorialGuide();
+    renderTutorialStep();
+  }
+
+  function endTutorial() {
+    _tutorialActive = false;
+    const overlay = el("tutorial-overlay");
+    if (overlay) overlay.classList.add("hidden");
+    markTutorialComplete();
+    destroyTutorialGuide();
+  }
+
+  function renderTutorialStep() {
+    const step = TUTORIAL_STEPS[_tutorialStep];
+    if (!step) { endTutorial(); return; }
+
+    const spotlight = el("tutorial-spotlight");
+    const tooltip = el("tutorial-tooltip");
+    const titleEl = el("tutorial-tooltip-title");
+    const textEl = el("tutorial-tooltip-text");
+    const stepEl = el("tutorial-step-indicator");
+    const nextBtn = el("tutorial-next-btn");
+    const skipBtn = el("tutorial-skip-btn");
+    const guide = el("tutorial-guide");
+
+    if (!tooltip || !titleEl) return;
+
+    titleEl.textContent = step.title;
+    textEl.textContent = step.text;
+    stepEl.textContent = `Step ${_tutorialStep + 1} of ${TUTORIAL_STEPS.length}`;
+
+    // Final step: change Next → Claim Reward
+    if (step.isFinal) {
+      nextBtn.textContent = "Claim Reward";
+      nextBtn.classList.add("tutorial-finish");
+      skipBtn.style.display = "none";
+    } else {
+      nextBtn.textContent = "Next";
+      nextBtn.classList.remove("tutorial-finish");
+      skipBtn.style.display = "";
+    }
+
+    // Spotlight cutout around target element
+    if (step.target) {
+      const targetEl = document.querySelector(step.target);
+      if (targetEl) {
+        const rect = targetEl.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const r = Math.max(rect.width, rect.height) / 2 + 16;
+        spotlight.style.clipPath = `circle(0px at ${cx}px ${cy}px)`;
+        requestAnimationFrame(() => {
+          spotlight.style.clipPath = `circle(${r}px at ${cx}px ${cy}px)`;
+        });
+        positionTooltip(step.position, rect);
+        if (guide) guide.style.display = "none";
+      }
+    } else {
+      // Center steps: full-screen spotlight off, show guide
+      spotlight.style.clipPath = "none";
+      positionTooltip("center", null);
+      if (guide) {
+        guide.style.display = "";
+        guide.style.position = "fixed";
+        guide.style.bottom = "200px";
+        guide.style.left = "20px";
+      }
+    }
+  }
+
+  function positionTooltip(position, targetRect) {
+    const tooltip = el("tutorial-tooltip");
+    if (!tooltip) return;
+    const tw = tooltip.offsetWidth || 280;
+    const th = tooltip.offsetHeight || 180;
+    const margin = 16;
+
+    if (!targetRect) {
+      // Center on screen
+      tooltip.style.left = `calc(50% - ${tw / 2}px)`;
+      tooltip.style.top = `calc(50% - ${th / 2}px)`;
+      return;
+    }
+
+    let left, top;
+    switch (position) {
+      case "below":
+        left = targetRect.left + targetRect.width / 2 - tw / 2;
+        top = targetRect.bottom + margin;
+        break;
+      case "above":
+        left = targetRect.left + targetRect.width / 2 - tw / 2;
+        top = targetRect.top - th - margin;
+        break;
+      case "right":
+        left = targetRect.right + margin;
+        top = targetRect.top + targetRect.height / 2 - th / 2;
+        break;
+      case "left":
+        left = targetRect.left - tw - margin;
+        top = targetRect.top + targetRect.height / 2 - th / 2;
+        break;
+      default:
+        left = targetRect.left + targetRect.width / 2 - tw / 2;
+        top = targetRect.bottom + margin;
+    }
+
+    // Clamp to viewport
+    left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+    top = Math.max(8, Math.min(top, window.innerHeight - th - 8));
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  }
+
+  function advanceTutorial() {
+    const step = TUTORIAL_STEPS[_tutorialStep];
+    if (step && step.isFinal) {
+      // Victory dance on final step!
+      playGuideEmote("Victory");
+      setTimeout(() => {
+        awardNewPlayerBonus();
+        endTutorial();
+      }, 1200);
+      return;
+    }
+    _tutorialStep++;
+    // Play a random emote on each Next tap
+    const emotes = ["Wave", "Jump", "Yes", "Dance"];
+    playGuideEmote(emotes[_tutorialStep % emotes.length]);
+    renderTutorialStep();
+  }
+
+  function awardNewPlayerBonus() {
+    // Only award if player is actually new
+    if (!isNewPlayer()) return;
+    const state = Store.get();
+    const BONUS_EB = 4000;
+    const BONUS_DIAMONDS = 500;
+    state.eb = (Number(state.eb) || 0) + BONUS_EB;
+    state.diamonds = (Number(state.diamonds) || 0) + BONUS_DIAMONDS;
+    state.player.bonusClaimed = true; // Cloud-persisted — prevents re-claim
+    Store.save(true);
+    updateTopbar();
+    showToast(`🎁 Welcome Bonus! +${BONUS_EB} EB & +${BONUS_DIAMONDS} Diamonds added to your treasury!`, 6000);
+  }
+
+  // --- Robot Pet Guide (3D rendered on canvas) ---
+  let _guideScene = null;
+  let _guideRenderer = null;
+  let _guideCamera = null;
+  let _guidePet = null;
+  let _guideAnimId = null;
+  let _guideMixer = null;
+  let _guideActions = {};
+  let _guideCurrentAnim = "Idle";
+
+  const GUIDE_EMOTES = ["Idle", "Wave", "Jump", "Dance", "Victory", "Yes", "No"];
+
+  function initTutorialGuide() {
+    const canvas = el("tutorial-guide-canvas");
+    if (!canvas || typeof THREE === "undefined") return;
+
+    try {
+      _guideScene = new THREE.Scene();
+      _guideCamera = new THREE.PerspectiveCamera(35, canvas.width / canvas.height, 0.1, 100);
+      _guideCamera.position.set(0, 1.0, 11.0);
+      _guideCamera.lookAt(0, 0.5, 0);
+
+      _guideRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      _guideRenderer.setSize(canvas.width, canvas.height);
+      _guideRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      _guideRenderer.setClearColor(0x000000, 0);
+
+      // Lighting
+      _guideScene.add(new THREE.AmbientLight(0xffffff, 0.8));
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+      dirLight.position.set(3, 4, 5);
+      _guideScene.add(dirLight);
+      const fillLight = new THREE.DirectionalLight(0x4fd6c4, 0.3);
+      fillLight.position.set(-2, 2, -1);
+      _guideScene.add(fillLight);
+
+      // Load RobotExpressive
+      const loader = new THREE.GLTFLoader();
+      loader.load("models/RobotExpressive.glb", (gltf) => {
+        _guidePet = gltf.scene;
+        _guidePet.scale.set(1.0, 1.0, 1.0);
+        _guidePet.position.set(0, -0.8, 0);
+        _guideScene.add(_guidePet);
+
+        // Setup all animations
+        if (gltf.animations && gltf.animations.length) {
+          _guideMixer = new THREE.AnimationMixer(_guidePet);
+          gltf.animations.forEach(clip => {
+            _guideActions[clip.name] = _guideMixer.clipAction(clip);
+          });
+          // Play idle by default
+          if (_guideActions["Idle"]) {
+            _guideActions["Idle"].play();
+          }
+        }
+      }, undefined, () => {});
+
+      animateGuide();
+    } catch (e) {
+      console.warn("[Tutorial] Guide init notice:", e);
+    }
+  }
+
+  function playGuideEmote(emoteName) {
+    if (!_guideMixer || !_guideActions[emoteName]) return;
+    // Stop all current actions
+    Object.values(_guideActions).forEach(a => a.stop());
+    // Play the requested emote
+    const action = _guideActions[emoteName];
+    action.reset();
+    action.clampWhenFinished = true;
+    action.loop = emoteName === "Idle" ? THREE.LoopRepeat : THREE.LoopOnce;
+    action.play();
+    _guideCurrentAnim = emoteName;
+
+    // Return to idle after non-idle emote finishes
+    if (emoteName !== "Idle") {
+      const duration = action.getClip().duration;
+      setTimeout(() => {
+        if (_guideCurrentAnim === emoteName && _guideActions["Idle"]) {
+          Object.values(_guideActions).forEach(a => a.stop());
+          _guideActions["Idle"].reset().play();
+          _guideCurrentAnim = "Idle";
+        }
+      }, (duration + 0.5) * 1000);
+    }
+  }
+
+  function animateGuide() {
+    if (!_guideRenderer || !_guideScene || !_guideCamera) return;
+    _guideAnimId = requestAnimationFrame(animateGuide);
+    if (_guideMixer) _guideMixer.update(0.016);
+    _guideRenderer.render(_guideScene, _guideCamera);
+  }
+
+  function destroyTutorialGuide() {
+    if (_guideAnimId) cancelAnimationFrame(_guideAnimId);
+    if (_guideRenderer) _guideRenderer.dispose();
+    _guideScene = null;
+    _guideRenderer = null;
+    _guideCamera = null;
+    _guidePet = null;
+    _guideMixer = null;
+    _guideActions = {};
+    const canvas = el("tutorial-guide-canvas");
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  function wireTutorial() {
+    el("tutorial-next-btn")?.addEventListener("click", advanceTutorial);
+    el("tutorial-skip-btn")?.addEventListener("click", endTutorial);
   }
 
   function startIncomeLoop() {
