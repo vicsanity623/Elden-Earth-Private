@@ -1885,22 +1885,23 @@
     let lastTickTime = Date.now();
     let lastIncomeCloudSave = Date.now();
     let lastLeaderboardRefresh = Date.now();
-    let lastUIUpdate = 0;
     setInterval(() => {
-      if (document.hidden) return;
-      if (typeof Store !== "undefined" && !Store.isSessionActive()) return;
+      if (document.hidden) return; // Sleep income ticker calculations when app is minimized
+      if (typeof Store !== "undefined" && !Store.isSessionActive()) return; // Session paused, stop earning
 
       if (typeof Citadels !== "undefined") Citadels.checkCapsuleUnlock();
       const now = Date.now();
       const rawDelta = (now - lastTickTime) / 1000;
-
+      
+      // Anti-cheat: Reject anomalous tick deltas (speed hack / Date manipulation)
       if (rawDelta < 0.3 || rawDelta > 120) {
         lastTickTime = now;
-        return;
+        return; // Skip this tick entirely
       }
-      const deltaSec = Math.min(60, rawDelta);
+      const deltaSec = Math.min(60, rawDelta); // Cap tick at 60s max
       lastTickTime = now;
 
+      // Always re-read state from Store (broadcast handler may have updated it)
       const state = Store.get();
       if (state.cash === undefined) state.cash = 0;
       if (state.lifetimeRent === undefined) state.lifetimeRent = state.cash;
@@ -1910,24 +1911,24 @@
       state.lifetimeRent += deltaEarned;
       state.lastTick = now;
 
-      // Cloud save every 30 seconds (was 20s — reduces syncSafeState calls)
-      if (now - lastIncomeCloudSave >= 30000) {
+      // Periodic cloud save every 20 seconds from income loop (also refreshes session lock heartbeat)
+      if (now - lastIncomeCloudSave >= 20000) {
         lastIncomeCloudSave = now;
         if (state.sessionLock) state.sessionLock.lockedAt = now;
         Store.save(true);
       }
 
-      // Throttle UI updates to every 2 seconds instead of every second
-      if (now - lastUIUpdate >= 2000) {
-        lastUIUpdate = now;
-        if (typeof Multiplier !== "undefined" && Multiplier.updateUI) {
-          Multiplier.updateUI(state);
-        }
-        if (typeof CompanionPet !== "undefined" && CompanionPet.updatePetHUD) {
-          CompanionPet.updatePetHUD();
-        }
-        updateTopbar();
+      // 🔥 CRITICAL: Update 30X/50X button label and countdown timers every second!
+      if (typeof Multiplier !== "undefined" && Multiplier.updateUI) {
+        Multiplier.updateUI(state);
       }
+
+      // Update Companion Pet HUD (mood decay, berry count)
+      if (typeof CompanionPet !== "undefined" && CompanionPet.updatePetHUD) {
+        CompanionPet.updatePetHUD();
+      }
+
+      updateTopbar();
     }, 1000);
   }
 

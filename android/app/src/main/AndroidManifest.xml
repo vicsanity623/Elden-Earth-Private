@@ -25,21 +25,15 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.EldenEarth"
+        android:theme="@style/Theme.EldensEarth"
         android:usesCleartextTraffic="true"
-        android:hardwareAccelerated="true"
-        android:largeHeap="true"
         android:networkSecurityConfig="@xml/network_security_config">
-
-        <meta-data
-            android:name="android.webkit.WebView.EnableMultiprocess"
-            android:value="true" />
 
         <activity
             android:name=".BootActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.EldenEarth.Boot"
+            android:theme="@style/Theme.EldensEarth.Boot"
             android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -53,7 +47,7 @@
             android:screenOrientation="unspecified"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.EldenEarth.Game">
+            android:theme="@style/Theme.EldensEarth.Game">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

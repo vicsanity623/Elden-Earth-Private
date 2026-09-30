@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean updateAvailable = false;
     private String updateVersion = "";
     private String updateUrl = "";
+    private boolean isResumingFromAuth = false;
 
     private static final String GAME_URL = "https://vicsanity623.github.io/Elden-Earth-v0-1-10-90b/";
     private static final int PERMISSION_REQUEST_CODE = 100;
@@ -89,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        WebView.setWebContentsDebuggingEnabled(true);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         hideSystemUI();
 
@@ -179,14 +179,11 @@ public class MainActivity extends AppCompatActivity {
         settings.setUseWideViewPort(true);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
-        settings.setSupportZoom(false);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setSupportMultipleWindows(true);
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
-        // Enable GPU-accelerated canvas and WebGL
-        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
         String ua = "Mozilla/5.0 (Linux; Android " + Build.VERSION.RELEASE + "; " + Build.MODEL
                 + ") AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36";

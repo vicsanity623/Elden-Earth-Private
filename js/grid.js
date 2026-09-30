@@ -584,21 +584,6 @@ const Grid = (() => {
     });
   }
 
-  // Cache tile bounds — they never change for a given tx/ty/TILE_SIZE
-  const _boundsCache = {};
-  function cachedTileBounds(tx, ty) {
-    const key = tx + "_" + ty;
-    if (!_boundsCache[key]) _boundsCache[key] = Geo.tileBounds(tx, ty, CONFIG.TILE_SIZE_METERS);
-    return _boundsCache[key];
-  }
-
-  // Cache rarity color lookups
-  const _rarityCache = {};
-  function cachedRarityColor(rarity) {
-    if (!_rarityCache[rarity]) _rarityCache[rarity] = rarityInfo(rarity).color;
-    return _rarityCache[rarity];
-  }
-
   function render() {
     // Battery Saver: Don't spend GPU/CPU cycles if phone is in pocket or map not ready!
     if (!map || !map.getStyle() || document.hidden) return;
@@ -632,22 +617,16 @@ const Grid = (() => {
       ? 8000
       : Math.min(2500000, 8000 * Math.pow(2, 14 - zoom));
 
-    // Pre-compute cull radius once instead of calling haversine per plot
-    const cullSquared = horizonM < Infinity ? horizonM * horizonM : Infinity;
-
     for (const tid in allPlots) {
       const plot = allPlots[tid];
-      const bounds = cachedTileBounds(plot.tx, plot.ty);
+      const bounds = Geo.tileBounds(plot.tx, plot.ty, CONFIG.TILE_SIZE_METERS);
       const coords = bounds.map(pt => [pt[1], pt[0]]);
       coords.push(coords[0]);
 
-      if (refLat && refLon && cullSquared < Infinity) {
+      if (refLat && refLon && horizonM < Infinity) {
         const cLat = (bounds[0][0] + bounds[2][0]) / 2;
         const cLon = (bounds[0][1] + bounds[2][1]) / 2;
-        // Quick squared-distance check instead of full haversine
-        const dLat = (cLat - refLat) * 111320;
-        const dLon = (cLon - refLon) * 111320 * Math.cos(refLat * Math.PI / 180);
-        if (dLat * dLat + dLon * dLon > cullSquared) {
+        if (Geo.haversine(refLat, refLon, cLat, cLon) > horizonM) {
           continue;
         }
       }
@@ -657,7 +636,7 @@ const Grid = (() => {
       claimedFeatures.push({
         type: "Feature",
         properties: {
-          color: cachedRarityColor(plot.rarity),
+          color: rarityInfo(plot.rarity).color,
           rarity: plot.rarity,
           ownerId: plot.ownerId,
           isSelf: isSelf,
