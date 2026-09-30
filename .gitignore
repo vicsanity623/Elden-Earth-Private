@@ -1,20 +1,28 @@
-vb.py.zip
-.DS_Store
-__pycache__/
-*.pyc
-.env
-venv
-venvaxiom
-.venv
-package-lock.json
-node_modules/
-functions/node_modules/
-functions/eldenearth-service-account.json
-.firebaserc
-.firebase
-firestore.rules
+# Android build outputs
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/app/release/
+android/app/debug/
+*.keystore
+google-services.json
+
+# Firebase
+.firebase/
 functions/
-server/
-SCPR.md
-PEER.md
-storage.rules
+*.service-account.json
+server/access-control.log
+
+# IDE
+*.iml
+.gradle/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/

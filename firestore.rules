@@ -1,0 +1,241 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    // Must match REALM_SERVER_EPOCH in functions/index.js (1789578877 seconds = 1789578877000 ms)
+    function isCurrentRealmSave() {
+      return request.resource.data.createdAt is number
+             && request.resource.data.createdAt >= 1789578877000;
+    }
+
+    // All fields that syncSafeState (Admin SDK callable) may write.
+    // Client direct writes to saves are blocked by allow create: false —
+    // only syncSafeState writes via Admin SDK. This function exists as a
+    // safety net in case someone bypasses the callable.
+    function changesOnlySafeSaveFields() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "player", "sessionLock", "disableShake", "lastTerritoryCheck",
+        "lastSavedAt", "_gameVersion", "lastTick", "extractor", "capsule",
+        "calendar", "dailyQuests", "lastLandPurchaseAt", "referralRoyalties",
+        "liveDiamonds", "collectedDiamondIds", "lastDiamondSpawn",
+        "cash", "lifetimeRent", "totalDividends", "plots", "plotBag",
+        "boostExpiry", "boostMultiplier", "initialEBClaimed",
+        "referralRoyaltyTotal", "referralCount", "lastWeeklyPoolClaim",
+        "communityGiftClaimedV1", "eldenStopCooldowns",
+        "eb", "diamonds"
+      ]);
+    }
+
+    // 1. PLAYER SAVES
+    match /saves/{userId} {
+      allow read: if true;
+      allow create: if false;
+      allow update: if isOwner(userId) && isCurrentRealmSave();
+      allow delete: if false;
+    }
+
+    // 2. WORLD PLOTS
+    match /plots/{plotId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+
+    // 3. LIVE ACTIVITY FEED
+    match /feed/{eventId} {
+      allow read: if true;
+      allow create: if signedIn()
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() <= 300;
+      allow update, delete: if false;
+    }
+
+    // 4. GLOBAL COMMUNITY CHAT (Requires 50 plots + server-side profanity filter)
+    match /chat/{messageId} {
+      allow read: if true;
+      allow create: if signedIn()
+                    && get(/databases/$(database)/documents/saves/$(request.auth.uid)).data.chatUnlocked == true
+                    && request.resource.data.text is string
+                    && request.resource.data.text.size() <= 120
+                    && request.resource.data.senderName is string
+                    && request.resource.data.senderName.size() <= 30
+                    && request.resource.data.senderId == request.auth.uid
+                    && request.resource.data.filtered == false;  // Server filters before writing
+      allow update, delete: if false;
+    }
+
+    // 5. CITADELS
+    match /citadels/{citadelId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+
+    // 6. LIVE ONLINE PRESENCE
+    match /presence/{userId} {
+      allow read: if true;
+      allow create, update, delete: if isOwner(userId);
+    }
+
+    // 7. AVATAR REVIEWS
+    match /avatar_reviews/{reviewId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update: if signedIn()
+                    && request.resource.data.status == "pending"
+                    && resource.data.status != "pending";
+      allow delete: if false;
+    }
+
+    // 8. ROYAL DIVIDENDS MAILBOX
+    match /dividends/{divId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update: if signedIn()
+                    && resource.data.recipientId == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // 9. USERNAMES
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // 10. BANNED USERS
+    match /banned_users/{userId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // 11. FRIEND REQUESTS
+    match /friend_requests/{requestId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.fromId == request.auth.uid;
+      allow update: if signedIn();
+      allow delete: if signedIn();
+    }
+
+    // 12. FRIENDSHIPS
+    match /friendships/{friendshipId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update: if signedIn();
+      allow delete: if signedIn();
+    }
+
+    // 13. DAILY FRIEND GIFTS
+    match /daily_gifts/{giftKey} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.fromId == request.auth.uid;
+      allow update: if signedIn()
+                    && resource.data.toId == request.auth.uid
+                    && request.resource.data.claimed == true;
+    }
+
+    // 14. REFERRALS
+    match /referrals/{referralId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+    }
+
+    // 14b. REFERRAL BONUSES
+    match /referral_bonuses/{bonusId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+                    && request.resource.data.toId is string
+                    && request.resource.data.fromId == request.auth.uid
+                    && request.resource.data.amount is number
+                    && request.resource.data.amount > 0
+                    && request.resource.data.amount <= 100;
+      allow update: if signedIn()
+                    && resource.data.toId == request.auth.uid
+                    && request.resource.data.claimed == true;
+    }
+
+    // 15. PLAYER REPORTS
+    match /player_reports/{reportId} {
+      allow create: if signedIn() && request.resource.data.reporterId == request.auth.uid;
+      allow read: if false;
+      allow delete: if false;
+    }
+
+    // 16. PLAYERS
+    match /players/{playerId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+                    && request.auth.uid == playerId
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.authProvider == "google";
+      allow update: if isOwner(playerId)
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.authProvider == "google";
+    }
+
+    // 17. WEEKLY BOOST
+    match /weekly_boost/{boostId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update: if signedIn() && resource.data.playerId == request.auth.uid;
+    }
+
+    // 18. CHEAT REPORTS
+    match /cheat_reports/{reportId} {
+      allow create: if signedIn();
+      allow read: if false;
+    }
+
+    // 19. PLAYER IPS
+    match /player_ips/{uid} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // 20. PLAYER POSITIONS
+    match /player_positions/{uid} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // 21. DIAMOND COLLECTS
+    match /diamond_collects/{collectKey} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // 22. DIAMONDS
+    match /diamonds/{diamondId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // 23. ELDEN STOPS (public world beacons — anyone can see, only Admin SDK writes)
+    match /elden_stops/{stopId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+
+    // 24. ELDEN STOP COOLDOWNS (server-authoritative 15-minute recharge gate)
+    match /elden_stop_cooldowns/{cooldownKey} {
+      allow read, write: if false;
+    }
+
+    // 25. CONFIG / WHITELIST (Admin SDK only — clients must never read emails)
+    match /config/{docId} {
+      allow read, write: if false;
+    }
+
+    // DEFAULT
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
