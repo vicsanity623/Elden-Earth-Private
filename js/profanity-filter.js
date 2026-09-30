@@ -7,7 +7,7 @@ const ProfanityFilter = (() => {
   // Comprehensive profanity list (lowercase)
   const PROFANITY_LIST = [
     // Sexual/Anatomical
-    "anal", "anus", "ass", "asshole", "bastard", "bitch", "boob", "boobs",
+    "anal", "anus", "bitch", "boob", "boobs",
     "cock", "cunt", "dick", "dickhead", "dildo", "fag", "faggot",
     "pussy", "rape", "rapist", "sex", "sexual", "slut", "whore",
     
@@ -16,7 +16,7 @@ const ProfanityFilter = (() => {
     "chink", "gook", "towelhead", "cracker", "honky",
     
     // Other Offensive
-    "bullshit", "crap", "dick", "douche", "fag",
+    "bullshit", "dick", "douche", "fag",
     "faggot", "prick", "pussy", "slut", "whore",
     
     // Violence/Abuse
