@@ -1103,6 +1103,16 @@ let lastConflictCheck = {};
     syncSafeStateToCloud().finally(() => window.location.reload());
   }
 
+  // Cache rarity rate lookups — CONFIG.PLOT_RARITIES.find is called per-plot
+  const _rarityRateCache = {};
+  function getRarityRate(rKey) {
+    if (_rarityRateCache[rKey] === undefined) {
+      const conf = CONFIG.PLOT_RARITIES.find(r => r.key === rKey);
+      _rarityRateCache[rKey] = conf ? conf.rate : CONFIG.PLOT_RARITIES[0].rate;
+    }
+    return _rarityRateCache[rKey];
+  }
+
   // Calculate total EB/sec from all owned plots + boost multiplier
   function totalRate() {
     if (!state || !state.plots) return 0;
@@ -1110,8 +1120,7 @@ let lastConflictCheck = {};
     for (const id in state.plots) {
       const p = state.plots[id];
       const rKey = p.rarity?.key || p.rarity || "common";
-      const conf = CONFIG.PLOT_RARITIES.find(r => r.key === rKey);
-      rate += conf ? conf.rate : CONFIG.PLOT_RARITIES[0].rate;
+      rate += getRarityRate(rKey);
     }
     // Apply 30X/50X boost if active (delegated to Multiplier module)
     if (typeof Multiplier !== "undefined") {
