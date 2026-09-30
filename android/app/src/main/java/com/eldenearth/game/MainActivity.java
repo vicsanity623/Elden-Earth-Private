@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private String updateUrl = "";
     private boolean isResumingFromAuth = false;
 
-    private static final String GAME_URL = "https://elden-earth-main.pages.dev";
+    private static final String GAME_URL = "https://vicsanity623.github.io/Elden-Earth-v0-1-10-90b/";
     private static final int PERMISSION_REQUEST_CODE = 100;
 
     private final ActivityResultLauncher<Intent> googleSignInLauncher =
@@ -243,6 +243,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPermissionRequest(android.webkit.PermissionRequest request) {
                 runOnUiThread(() -> request.grant(request.getResources()));
+            }
+
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origin, android.webkit.GeolocationCallback.Callback callback) {
+                callback.invoke(origin, true, false);
             }
 
             @Override

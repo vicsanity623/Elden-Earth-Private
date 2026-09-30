@@ -58,6 +58,12 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="vicsanity623.github.io" android:pathPrefix="/Elden-Earth-v0-1-10-90b/" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="elden-earth-main.pages.dev" android:pathPrefix="/__/auth" />
             </intent-filter>
             <intent-filter>
