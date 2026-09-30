@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.EldensEarth" parent="Theme.AppCompat.NoActionBar">
+    <style name="Theme.EldenEarth" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@drawable/splash_bg</item>
@@ -9,7 +9,7 @@
         <item name="android:windowLightStatusBar">false</item>
     </style>
 
-    <style name="Theme.EldensEarth.Boot">
+    <style name="Theme.EldenEarth.Boot">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@drawable/splash_bg</item>
@@ -17,7 +17,7 @@
         <item name="android:navigationBarColor">#FF0A0A0A</item>
     </style>
 
-    <style name="Theme.EldensEarth.Game">
+    <style name="Theme.EldenEarth.Game">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@color/elden_bg</item>
