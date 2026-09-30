@@ -246,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onGeolocationPermissionsShowPrompt(String origin, android.webkit.GeolocationCallback.Callback callback) {
+            public void onGeolocationPermissionsShowPrompt(String origin, android.webkit.GeolocationPermissions.Callback callback) {
                 callback.invoke(origin, true, false);
             }
 
