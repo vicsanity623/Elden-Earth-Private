@@ -204,62 +204,6 @@ For a complete guide to all in-game features, currencies, progression systems, a
 
 ---
 
-## Setup
-
-### Quick Start (Static Only)
-
-1. Clone or download the repository
-2. Serve with any static file server:
-   ```bash
-   npx serve .
-   # or
-   python3 -m http.server 8000
-   ```
-3. Open in browser. Guest mode works without Firebase.
-
-### GitHub Pages Deployment
-
-1. Create a GitHub repository and push all files
-2. Go to **Settings > Pages**
-3. Set Source to **Deploy from a branch**, select `main`, folder `/ (root)`
-4. Open the deployed URL on your phone
-5. Tap **Share > Add to Home Screen** (iOS) or **Install App** (Android)
-
-### Enable Google Sign-In & Cloud Saves
-
-1. Create an OAuth 2.0 Client ID at [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-   - Authorized origin: `https://yourusername.github.io`
-2. Copy the Client ID into `js/config.js`:
-   ```javascript
-   GOOGLE_CLIENT_ID: "your-id.apps.googleusercontent.com",
-   ```
-3. Create a Firebase project at [firebase.google.com](https://firebase.google.com)
-4. Enable **Firestore Database** and paste config into `js/config.js`:
-   ```javascript
-   FIREBASE_CONFIG: {
-     apiKey: "YOUR_API_KEY",
-     authDomain: "your-app.firebaseapp.com",
-     projectId: "your-app",
-     // ...
-   }
-   ```
-5. Deploy Cloud Functions:
-   ```bash
-   cd functions
-   npm install
-   firebase deploy --only functions
-   ```
-
-### Deploy Cloud Functions
-
-```bash
-cd functions
-npm install
-firebase deploy --only functions
-```
-
----
-
 ## Configuration
 
 All gameplay tuning is in **`js/config.js`**:
@@ -316,4 +260,4 @@ All gameplay tuning is in **`js/config.js`**:
 
 ## License
 
-This is a personal, open-source fan implementation of real-world grid collection games. Built from scratch with pure web standards for educational and entertainment purposes.
+This is a personal, NOT open-source fan implementation of real-world grid collection games. Built from scratch with pure web standards for educational and entertainment purposes.
