@@ -11,8 +11,8 @@ android {
         applicationId "com.eldenearth.game"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "0.1.11.01b"
+        versionCode 2
+        versionName "0.1.11.02b"
 
         vectorDrawables.useSupportLibrary = true
     }
