@@ -167,6 +167,7 @@ const Feed = (() => {
     requestAnimationFrame(() => {
       renderFeedList();
       renderScheduled = false;
+      syncSideHudToFeed();
     });
   }
 
@@ -216,6 +217,22 @@ const Feed = (() => {
       unreadCount = 0;
       updateBadge();
     }
+    // Snap side HUD below the feed after collapse/expand
+    setTimeout(syncSideHudToFeed, 50);
+  }
+
+  // Snap the side HUD stack so its top edge sits just below the feed card
+  function syncSideHudToFeed() {
+    const hudStack = document.querySelector(".side-hud-stack");
+    if (!hudStack || !feedCard) return;
+    // Wait for feed layout to settle
+    requestAnimationFrame(() => {
+      const rect = feedCard.getBoundingClientRect();
+      if (rect.height === 0) return;
+      const gap = 10;
+      const topPx = Math.ceil(rect.bottom + gap);
+      hudStack.style.top = topPx + "px";
+    });
   }
 
   // Push an event to Firebase Firestore
@@ -346,7 +363,11 @@ const Feed = (() => {
     });
 
     listen();
+
+    // Snap side HUD below feed on load
+    setTimeout(syncSideHudToFeed, 500);
+    window.addEventListener("resize", () => setTimeout(syncSideHudToFeed, 200));
   }
 
-  return { init, broadcast, resolveCity };
+  return { init, broadcast, resolveCity, syncSideHudToFeed };
 })();

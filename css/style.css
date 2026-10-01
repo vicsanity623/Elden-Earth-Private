@@ -3410,8 +3410,8 @@ html,body{
 
 .landlord-ruler-avatar {
   position: absolute;
-  top: 3px;
-  right: 12px;
+  top: 5.2px;
+  right: 16px;
   width: clamp(56px, 16vw, 72px);
   height: clamp(56px, 16vw, 72px);
   border-radius: 50%;
@@ -3447,14 +3447,14 @@ html,body{
 
 .landlord-ruler-location {
   position: absolute;
-  bottom: 12px;
-  left: 14px;
-  right: 4px;
-  font-size: clamp(8px, 2.2vw, 9.9px);
+  bottom: 15px;
+  left: 17px;
+  right: 8px;
+  font-size: clamp(7px, 2.0vw, 9.4px);
   font-weight: 700;
   color: var(--parchment);
   text-align: left;
-  text-transform: lowercase;
+  text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -3745,7 +3745,7 @@ body.buy-mode #treasury-ad-container {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease, top 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .side-hud-stack::-webkit-scrollbar {
@@ -8233,5 +8233,4 @@ body.birds-eye-mode .top-hud-row {
 .royalties-claim-all-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-}
 }
