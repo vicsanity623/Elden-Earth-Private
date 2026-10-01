@@ -4,7 +4,7 @@
 // ============================================================
 const CONFIG = {
   // --- Game Version (bump on every patch to auto-wipe stale localStorage) ---
-  GAME_VERSION: "0.1.11.03b",
+  GAME_VERSION: "0.1.11.10b",
 
   // --- Realm Server Epoch ---
   // Bump this timestamp whenever you intentionally wipe the Firestore database.
@@ -133,8 +133,8 @@ const CONFIG = {
   ELDEN_STOP_EB_RANGE: [0, 5],                   // EB per spin (informational)
   ELDEN_STOP_PLOT_JACKPOT_CHANCE: 0.015,         // 1.5% Lucky Land Plot drop
   ELDEN_STOP_BASE_ZOOM: 18,                      // Reference zoom where beacon screen-scale = 1.0
-  ELDEN_STOP_MIN_SCALE: 0.4,                     // Floor scale when zoomed out (before full cull)
-  ELDEN_STOP_MAX_SCALE: 1.15,                    // Ceiling scale when zoomed in
+  ELDEN_STOP_MIN_SCALE: 0.28,                    // Floor scale when zoomed out (before full cull)
+  ELDEN_STOP_MAX_SCALE: 0.75,                    // Ceiling scale when zoomed in
 
   // --- Map LOD / Far-Zoom Culling (phone GPU heat relief) ---
   // Below this zoom, ALL decorative 3D/DOM game objects are destroyed/hidden.
@@ -143,10 +143,10 @@ const CONFIG = {
 
   // --- 3D Character Roster (Heroic Scale) ---
   AVAILABLE_CHARACTERS: [
-    { id: "soldier",   name: "Vanguard Soldier", file: "models/Soldier.glb",   scale: 4.8, icon: "🛡️" },
-    { id: "xbot",      name: "X-Operative",      file: "models/Xbot.glb",      scale: 4.2, icon: "🦾" },
-    { id: "fox",       name: "Spirit Fox",       file: "models/Fox.glb",       scale: 0.08, icon: "🦊" },
-    { id: "cesium",    name: "Cesium Runner",    file: "models/CesiumMan.glb", scale: 5.0, icon: "🏃" },
+    { id: "soldier",   name: "Vanguard Soldier", file: "models/Soldier.glb",   scale: 3.2, icon: "🛡️" },
+    { id: "xbot",      name: "X-Operative",      file: "models/Xbot.glb",      scale: 2.8, icon: "🦾" },
+    { id: "fox",       name: "Spirit Fox",       file: "models/Fox.glb",       scale: 0.06, icon: "🦊" },
+    { id: "cesium",    name: "Cesium Runner",    file: "models/CesiumMan.glb", scale: 3.4, icon: "🏃" },
   ],
 
   // --- 30-Day Daily Login Calendar ---

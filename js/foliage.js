@@ -112,8 +112,8 @@ const Foliage = (() => {
     wrap.className = "parcel-prop-wrap";
     wrap.style.cssText = "will-change: transform; transform: translateZ(0); pointer-events: none;";
 
-    const pxSize = Math.round(26 * scaleMultiplier);
-    const fontPx = Math.round(18 * scaleMultiplier);
+    const pxSize = Math.round(18 * scaleMultiplier);
+    const fontPx = Math.round(13 * scaleMultiplier);
 
     if (cachedMushroomImgSrc) {
       wrap.innerHTML = `<img src="${cachedMushroomImgSrc}" style="width:${pxSize}px;height:${pxSize}px;object-fit:contain;display:block;">`;
@@ -168,9 +168,9 @@ const Foliage = (() => {
           "interpolate",
           ["linear"],
           ["zoom"],
-          16.5, ["*", 0.16, ["get", "scale"]],
-          18.5, ["*", 0.32, ["get", "scale"]],
-          20,   ["*", 0.52, ["get", "scale"]]
+          16.5, ["*", 0.11, ["get", "scale"]],
+          18.5, ["*", 0.22, ["get", "scale"]],
+          20,   ["*", 0.36, ["get", "scale"]]
         ],
         "icon-allow-overlap": true,
         "icon-ignore-placement": true,

@@ -328,7 +328,7 @@ html,body{
   background: rgba(0, 0, 0, 0.5) url('../assets/topbar-frame.png') no-repeat center center / 100% 100%;
   
   /* 3. Padding to keep the text inside the red lines */
-  padding: 10px 24px 12px 24px;
+  padding: clamp(6px, 2vw, 10px) clamp(12px, 4vw, 24px) clamp(8px, 2.5vw, 12px) clamp(12px, 4vw, 24px);
   text-align: center;
   pointer-events: auto;
   
@@ -338,24 +338,24 @@ html,body{
 /* Elden Earth Brand Title */
 .hero-brand-title {
   font-family: var(--font-display, 'Cinzel', serif);
-  font-size: 12px;
+  font-size: clamp(9px, 2.5vw, 12px);
   font-weight: 800;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   color: #ff3344;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .hero-brand-gem {
   color: #ff002b;
-  font-size: 10px;
+  font-size: clamp(8px, 2vw, 10px);
   filter: drop-shadow(0 0 6px #ff002b);
 }
 
 .hero-version-tag {
   font-family: var(--font-body);
-  font-size: 10px;
+  font-size: clamp(8px, 2vw, 10px);
   font-weight: 700;
   color: #a0a5b5;
   opacity: 0.8;
@@ -375,27 +375,27 @@ html,body{
 }
 
 .cash-dollar {
-  font-size: 16px;
+  font-size: clamp(12px, 4vw, 16px);
   font-weight: 700;
   color: #ff2b43;
   margin-right: 1px;
 }
 
 .cash-whole {
-  font-size: 32px;
+  font-size: clamp(22px, 7vw, 32px);
   font-weight: 800;
   color: #ffffff;
   letter-spacing: 0.5px;
 }
 
 .cash-point {
-  font-size: 16px;
+  font-size: clamp(12px, 4vw, 16px);
   font-weight: 700;
   color: #ff2b43;
 }
 
 .cash-decimal {
-  font-size: 19.5px;
+  font-size: clamp(14px, 5vw, 19.5px);
   font-weight: 700;
   color: #e5e7eb;
   letter-spacing: 0.3px;
@@ -439,14 +439,14 @@ html,body{
 }
 .sub-stat .stat-label{
   display:block;
-  font-size:12px; letter-spacing:0.3px;
+  font-size:clamp(9px, 2.5vw, 12px); letter-spacing:0.3px;
   color:var(--text-dim);
 }
 .sub-stat .stat-value{
   display:block;
   font-family:var(--font-display);
   font-weight:700;
-  font-size:16px;
+  font-size:clamp(11px, 3.5vw, 16px);
   color:var(--gold-hi);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
@@ -558,30 +558,30 @@ html,body{
 
 #bottombar {
   position: absolute; 
-  bottom: 52px;
+  bottom: calc(52px + env(safe-area-inset-bottom, 0px));
   left: 0; 
   right: 0; 
   z-index: 20;
   display: flex; 
   align-items: center; 
   justify-content: center; 
-  gap: 6px;
+  gap: clamp(4px, 1.5vw, 6px);
   padding: 6px 8px;
   background: transparent;
   box-sizing: border-box;
 }
 
 .round-btn {
-  width: 40px; 
-  height: 40px; 
-  min-width: 40px;
-  max-width: 40px;
-  flex: 0 0 40px;
+  width: clamp(32px, 9vw, 40px); 
+  height: clamp(32px, 9vw, 40px); 
+  min-width: clamp(32px, 9vw, 40px);
+  max-width: clamp(32px, 9vw, 40px);
+  flex: 0 0 auto;
   border-radius: 50%;
   background: var(--panel-2);
   border: 1px solid var(--line);
   color: var(--gold-hi);
-  font-size: 17px;
+  font-size: clamp(13px, 4vw, 17px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -592,16 +592,16 @@ html,body{
 
 .btn-earn {
   flex: 1 1 auto;
-  min-width: 70px;
+  min-width: 60px;
   max-width: 105px;
   width: auto;
-  padding: 11px 6px;
+  padding: clamp(8px, 2.5vw, 11px) 6px;
   border-radius: 0;
   background: url('../assets/button-frame-earn.png') no-repeat center center / 100% 100%, linear-gradient(180deg, #ff5566, #a31226);
   color: #ffffff;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 13.5px;
+  font-size: clamp(10px, 3vw, 13.5px);
   letter-spacing: 0.3px;
   white-space: nowrap;
   text-align: center;
@@ -1211,15 +1211,15 @@ html,body{
 /* ---------- Permanent Multiplier Floating Button ---------- */
 .multiplier-btn {
   position: absolute;
-  left: 14px;
-  bottom: 122px;
+  left: 10px;
+  bottom: calc(100px + env(safe-area-inset-bottom, 0px));
   z-index: 999;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  width: clamp(40px, 11vw, 52px);
+  height: clamp(40px, 11vw, 52px);
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(22, 32, 47, 0.95), rgba(13, 20, 32, 0.98));
   border: 2px solid var(--gold);
@@ -1230,8 +1230,8 @@ html,body{
   animation: multGlow 2s infinite ease-in-out;
 }
 .multiplier-btn:active { transform: scale(0.92); }
-.multiplier-btn .mult-tag { font-size: 14px; font-weight: 800; line-height: 1; }
-.multiplier-btn .mult-sub { font-size: 8px; letter-spacing: 1px; color: var(--teal); }
+.multiplier-btn .mult-tag { font-size: clamp(10px, 3vw, 14px); font-weight: 800; line-height: 1; }
+.multiplier-btn .mult-sub { font-size: 7px; letter-spacing: 0.8px; color: var(--teal); }
 
 @keyframes multGlow {
   0%, 100% { opacity: 0.92; transform: scale(1); }
@@ -1355,7 +1355,7 @@ html,body{
 
 .feed-badge {
   font-family: var(--font-display);
-  font-size: 11.5px;
+  font-size: clamp(9px, 2.5vw, 11.5px);
   font-weight: 700;
   color: var(--gold-hi);
   letter-spacing: 0.8px;
@@ -1419,7 +1419,7 @@ html,body{
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  font-size: 11px;
+  font-size: clamp(9px, 2.5vw, 11px);
   line-height: 1.35;
   color: #ffffff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 6px rgba(0, 0, 0, 0.8);
@@ -2578,8 +2578,8 @@ html,body{
 
 .gem-anchor {
   position: relative;
-  width: 24px;
-  height: 30px;
+  width: 18px;
+  height: 23px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2602,8 +2602,8 @@ html,body{
 /* 3D Gem Floating / Hovering Animation */
 .gem-3d {
   position: relative;
-  width: 20px;
-  height: 24px;
+  width: 15px;
+  height: 18px;
   animation: gemHover var(--hover-dur, 3.2s) ease-in-out infinite;
   animation-delay: var(--hover-delay, 0s);
   will-change: transform;
@@ -2613,20 +2613,20 @@ html,body{
   width: 100%;
   height: 100%;
   display: block;
-  filter: drop-shadow(0 0 6px rgba(255, 0, 40, 0.65));
+  filter: drop-shadow(0 0 4px rgba(255, 0, 40, 0.65));
 }
 
 .gem-img {
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 0 8px rgba(255, 0, 40, 0.7));
+  filter: drop-shadow(0 0 5px rgba(255, 0, 40, 0.7));
 }
 
 .diamond-3d-wrapper.far .gem-img {
-  width: 20px;
-  height: 20px;
+  width: 14px;
+  height: 14px;
   filter: drop-shadow(0 0 4px rgba(255, 0, 40, 0.5));
 }
 
@@ -2784,12 +2784,12 @@ html,body{
 /* Upright Circular Avatar Disc */
 .sign-avatar-disc {
   position: relative;
-  width: 32px;
-  height: 32px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  border: 2px solid #ff2b43;
+  border: 1.5px solid #ff2b43;
   background: #0d1420;
-  box-shadow: 0 0 14px rgba(0, 0, 0, 0.9), 0 0 8px rgba(255, 43, 67, 0.6);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.9), 0 0 5px rgba(255, 43, 67, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2805,19 +2805,19 @@ html,body{
 
 /* Golden Stem Pinning Sign into the Ground */
 .sign-stem {
-  width: 2px;
-  height: 12px;
+  width: 1.5px;
+  height: 8px;
   background: linear-gradient(to bottom, #ff2b43, rgba(255, 43, 67, 0.2));
   z-index: 1;
 }
 
 /* Soft Ground Shadow Beneath the Stem */
 .sign-ground-shadow {
-  width: 16px;
-  height: 5px;
+  width: 10px;
+  height: 3px;
   background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.75) 0%, transparent 80%);
   border-radius: 50%;
-  margin-top: -2px;
+  margin-top: -1px;
 }
 
 /* ---------- 3D Extractor Beacon with Orbital Energy Rings ---------- */
@@ -2844,8 +2844,8 @@ html,body{
 
 .beacon-root {
   position: relative;
-  width: 46px;
-  height: 58px;
+  width: 32px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2856,20 +2856,20 @@ html,body{
 /* Pulsing Ground Rune — STATIC until the player taps the extractor */
 .beacon-ground-aura {
   position: absolute;
-  bottom: 6px;
-  width: 24px;
-  height: 10px;
+  bottom: 4px;
+  width: 16px;
+  height: 7px;
   border-radius: 50%;
   background: radial-gradient(ellipse, rgba(255, 23, 68, 0.9) 0%, transparent 75%);
-  box-shadow: 0 0 12px rgba(255, 23, 68, 0.9);
+  box-shadow: 0 0 8px rgba(255, 23, 68, 0.9);
   animation: none;
 }
 
 /* 3D Floating Central Extractor Gem — STATIC until tapped */
 .beacon-core-gem {
   position: relative;
-  width: 22px;
-  height: 28px;
+  width: 16px;
+  height: 20px;
   z-index: 2;
   animation: none;
   filter: drop-shadow(0 0 4px rgba(255, 23, 68, 0.9));
@@ -2881,8 +2881,8 @@ html,body{
 }
 
 .beacon-img {
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
   display: block;
 }
@@ -2890,13 +2890,13 @@ html,body{
 /* Orbital Energy Rings — STATIC until the player taps the extractor */
 .orbit-ring {
   position: absolute;
-  top: 14px;
-  left: 6px;
-  width: 32px;
-  height: 32px;
+  top: 10px;
+  left: 4px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  border: 1.5px solid rgba(255, 23, 68, 0.9);
-  box-shadow: 0 0 4px rgba(255, 23, 68, 0.9);
+  border: 1.2px solid rgba(255, 23, 68, 0.9);
+  box-shadow: 0 0 3px rgba(255, 23, 68, 0.9);
   pointer-events: none;
 }
 
@@ -3251,16 +3251,16 @@ html,body{
 /* ---------- BUY LAND MODE CONTROLS ---------- */
 .btn-buy-land {
   flex: 1.15 1 auto !important;
-  min-width: 85px !important;
+  min-width: 70px !important;
   max-width: 120px !important;
   width: auto !important;
-  padding: 11px 6px !important;
+  padding: clamp(8px, 2.5vw, 11px) 6px !important;
   border-radius: 0 !important;
   background: url('../assets/button-frame.png') no-repeat center center / 100% 100%, #000 !important;
   color: #ffffff !important;
   font-family: var(--font-display) !important;
   font-weight: 800 !important;
-  font-size: 13.5px !important;
+  font-size: clamp(10px, 3vw, 13.5px) !important;
   letter-spacing: 0.3px;
   white-space: nowrap !important;
   text-align: center;
@@ -3385,7 +3385,7 @@ html,body{
 /* --- Landlord Title Pill (Mayor / Governor / President) --- */
 .landlord-pill {
   position: fixed;
-  bottom: 120px;
+  bottom: calc(100px + env(safe-area-inset-bottom, 0px));
   right: 4px;
   z-index: 20;
   pointer-events: none;
@@ -3398,8 +3398,8 @@ html,body{
 
 .landlord-ruler-bg {
   position: relative;
-  width: 150px;
-  height: 160px;
+  width: clamp(100px, 28vw, 130px);
+  height: clamp(108px, 30vw, 140px);
 }
 
 .landlord-ruler-img {
@@ -3410,17 +3410,17 @@ html,body{
 
 .landlord-ruler-avatar {
   position: absolute;
-  top: 4px;
-  right: 18px;
-  width: 86px;
-  height: 86px;
+  top: 3px;
+  right: 12px;
+  width: clamp(56px, 16vw, 72px);
+  height: clamp(56px, 16vw, 72px);
   border-radius: 50%;
   border: 2px solid var(--gold);
   background: var(--ink-2);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 14px;
   overflow: hidden;
 }
 
@@ -3433,13 +3433,13 @@ html,body{
 
 .landlord-ruler-title {
   position: absolute;
-  top: 96px;
-  left: 21px;
-  right: 6px;
+  top: clamp(64px, 18vw, 80px);
+  left: 14px;
+  right: 4px;
   font-family: var(--font-display, 'Cinzel', serif);
-  font-size: 10px;
+  font-size: clamp(8px, 2.2vw, 10px);
   font-weight: 700;
-  letter-spacing: 0.9px;
+  letter-spacing: 0.7px;
   text-transform: uppercase;
   color: var(--gold);
   text-align: left;
@@ -3447,10 +3447,10 @@ html,body{
 
 .landlord-ruler-location {
   position: absolute;
-  bottom: 18px;
-  left: 20px;
-  right: 6px;
-  font-size: 9.9px;
+  bottom: 12px;
+  left: 14px;
+  right: 4px;
+  font-size: clamp(8px, 2.2vw, 9.9px);
   font-weight: 700;
   color: var(--parchment);
   text-align: left;
@@ -3732,14 +3732,14 @@ body.buy-mode #treasury-ad-container {
 /* ================= UNIFIED SIDE HUD STACK (MINE + RANKS + CALENDAR + QUESTS) ================= */
 .side-hud-stack {
   position: fixed;
-  left: 14px;
-  top: 300px;
-  bottom: 120px;
+  left: clamp(6px, 2vw, 14px);
+  top: clamp(200px, 45vw, 300px);
+  bottom: calc(clamp(90px, 25vw, 120px) + env(safe-area-inset-bottom, 0px));
   z-index: 22;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: clamp(3px, 1vw, 6px);
   pointer-events: none;
   overflow-y: auto;
   overflow-x: hidden;
@@ -3805,8 +3805,8 @@ body.buy-mode #treasury-ad-container {
 
 /* Matching 48px width cards for pixel-perfect vertical alignment */
 .side-hud-card {
-  width: 48px;
-  height: 50px;
+  width: clamp(38px, 10vw, 48px);
+  height: clamp(40px, 11vw, 50px);
   border-radius: 12px;
   overflow: hidden;
   box-sizing: border-box;
@@ -3825,8 +3825,8 @@ body.buy-mode #treasury-ad-container {
 }
 
 .trophy-img {
-  width: 40px;
-  height: 40px;
+  width: clamp(30px, 8vw, 40px);
+  height: clamp(30px, 8vw, 40px);
   object-fit: contain;
   filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.2)) drop-shadow(0 0 4px rgba(255, 215, 0, 0.25));
 }
@@ -3849,14 +3849,14 @@ body.buy-mode #treasury-ad-container {
 }
 
 .custom-hud-img {
-  width: 42px;
-  height: 42px;
+  width: clamp(32px, 9vw, 42px);
+  height: clamp(32px, 9vw, 42px);
   object-fit: contain;
 }
 
 .side-hud-subtext {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: clamp(7px, 2vw, 9px);
   font-weight: 700;
   letter-spacing: 0.8px;
   color: var(--gold-hi);
@@ -4076,13 +4076,13 @@ body.buy-mode #treasury-ad-container {
 
 /* ================= 3D PARCEL PROPS & MUSHROOMS ================= */
 .parcel-prop-wrap {
-  width: 32px;
-  height: 32px;
+  width: 22px;
+  height: 22px;
   pointer-events: none !important;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.75));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.75));
 }
 
 .parcel-prop-canvas {
@@ -4689,8 +4689,8 @@ div[aria-label="Advertisement"] {
 /* Master Monument Container: Anchored strictly at Ground Level (bottom: 0) */
 .citadel-3d-monument {
   position: relative !important;
-  width: 72px !important;
-  height: 20px !important;
+  width: 48px !important;
+  height: 14px !important;
   pointer-events: auto !important;
   cursor: pointer !important;
   z-index: 20 !important;
@@ -4713,8 +4713,8 @@ div[aria-label="Advertisement"] {
   bottom: 4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 26px;
-  height: 10px;
+  width: 18px;
+  height: 7px;
   border-radius: 50%;
   background: radial-gradient(ellipse, var(--r-color, #e85f6a) 0%, transparent 75%);
   box-shadow: 0 0 12px var(--r-color, #e85f6a);
@@ -4724,43 +4724,43 @@ div[aria-label="Advertisement"] {
 /* Stem raised and lengthened (+8px base, 28px tall) */
 .growth-pin-stem {
   position: absolute;
-  bottom: 8px;
+  bottom: 6px;
   left: 50%;
   transform: translateX(-50%);
-  width: 2.5px;
-  height: 28px;
+  width: 2px;
+  height: 18px;
   background: linear-gradient(to top, var(--r-color, #e85f6a), rgba(240, 211, 138, 0.95));
-  border-radius: 1.5px;
-  box-shadow: 0 0 8px var(--r-color, #e85f6a);
+  border-radius: 1px;
+  box-shadow: 0 0 5px var(--r-color, #e85f6a);
 }
 
-/* Seed Core elevated to +36px — STATIC until tapped */
+/* Seed Core elevated — STATIC until tapped */
 .growth-seed-core {
   position: absolute;
-  bottom: 36px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 22px;
-  filter: drop-shadow(0 0 12px var(--r-color, #e85f6a));
+  font-size: 15px;
+  filter: drop-shadow(0 0 8px var(--r-color, #e85f6a));
   animation: none;
   line-height: 1;
 }
 
-/* Compact Timer Pill elevated to +58px — text still updates, but no pulse loop */
+/* Compact Timer Pill elevated — text still updates, but no pulse loop */
 .growth-timer-pill {
   position: absolute;
-  bottom: 58px;
+  bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(13, 20, 32, 0.95);
   border: 1px solid var(--r-color, #e85f6a);
   color: var(--gold-hi);
-  font-size: 9.5px;
+  font-size: 8px;
   font-weight: 800;
-  padding: 2.5px 8px;
+  padding: 2px 6px;
   border-radius: 999px;
   white-space: nowrap;
-  box-shadow: 0 0 12px var(--r-color, #e85f6a);
+  box-shadow: 0 0 8px var(--r-color, #e85f6a);
   letter-spacing: 0.3px;
   animation: none;
 }
@@ -4789,50 +4789,50 @@ div[aria-label="Advertisement"] {
   bottom: 0px;
   left: 50%;
   transform: translateX(-50%);
-  width: 44px;
-  height: 12px;
+  width: 28px;
+  height: 8px;
   border-radius: 50%;
   background: radial-gradient(ellipse at center, rgba(255, 0, 40, 0.7) 0%, transparent 75%) !important;
-  box-shadow: 0 0 18px rgba(255, 0, 40, 0.8) !important;
+  box-shadow: 0 0 10px rgba(255, 0, 40, 0.8) !important;
 }
 
 /* Kinetic Rotating Rings base (Hardware-accelerated) */
 .dyson-ring {
   position: absolute;
   border-radius: 50%;
-  border: 1.5px solid var(--core-color, #e85f6a);
-  box-shadow: 0 0 8px var(--core-color, #e85f6a);
+  border: 1.2px solid var(--core-color, #e85f6a);
+  box-shadow: 0 0 5px var(--core-color, #e85f6a);
   left: 50%;
   transform-origin: center center;
 }
 
 .dyson-ring.ring-1 {
-  width: 64px;
-  height: 64px;
-  bottom: 18px;
-  margin-left: -32px;
+  width: 42px;
+  height: 42px;
+  bottom: 12px;
+  margin-left: -21px;
   border-color: #ff1744 !important;
-  box-shadow: 0 0 12px rgba(255, 23, 68, 0.95) !important;
+  box-shadow: 0 0 8px rgba(255, 23, 68, 0.95) !important;
   transform: rotateX(65deg);
 }
 
 .dyson-ring.ring-2 {
-  width: 50px;
-  height: 50px;
-  bottom: 25px;
-  margin-left: -25px;
+  width: 32px;
+  height: 32px;
+  bottom: 16px;
+  margin-left: -16px;
   border-color: #ff1744 !important;
-  box-shadow: 0 0 12px rgba(255, 23, 68, 0.95) !important;
+  box-shadow: 0 0 8px rgba(255, 23, 68, 0.95) !important;
   transform: rotateY(65deg);
 }
 
 .dyson-ring.ring-3 {
-  width: 36px;
-  height: 36px;
-  bottom: 32px;
-  margin-left: -18px;
+  width: 24px;
+  height: 24px;
+  bottom: 20px;
+  margin-left: -12px;
   border-color: #ff1744 !important;
-  box-shadow: 0 0 12px rgba(255, 23, 68, 0.95) !important;
+  box-shadow: 0 0 8px rgba(255, 23, 68, 0.95) !important;
   transform: rotateX(35deg) rotateY(45deg);
 }
 
@@ -4848,20 +4848,20 @@ div[aria-label="Advertisement"] {
 /* Avatar Chamber scaled to fit billboard size — STATIC until tapped */
 .dyson-core-avatar {
   position: absolute;
-  bottom: 33px;
+  bottom: 22px;
   left: 50%;
   transform: translateX(-50%);
-  width: 34px;
-  height: 34px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: #0d1420;
-  border: 1.5px solid var(--core-color, #e85f6a);
+  border: 1.2px solid var(--core-color, #e85f6a);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 9px;
   z-index: 5;
-  box-shadow: 0 0 12px var(--core-color, #e85f6a), 0 0 4px #fff;
+  box-shadow: 0 0 8px var(--core-color, #e85f6a), 0 0 3px #fff;
   animation: none;
   overflow: hidden;
 }
@@ -4869,12 +4869,12 @@ div[aria-label="Advertisement"] {
 /* Spire Tip scaled down — STATIC until tapped */
 .dyson-spire-tip {
   position: absolute;
-  bottom: 84px;
+  bottom: 52px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 18px;
+  font-size: 12px;
   color: #ff1744 !important;
-  text-shadow: 0 0 8px #ff002b !important;
+  text-shadow: 0 0 6px #ff002b !important;
   animation: none;
 }
 
@@ -6416,8 +6416,8 @@ body.no-shake .boost-timer-badge.super-50x {
    normal flow and each beacon drifts ~20px DOWN per planted neighbor. */
 .elden-stop-marker {
   position: absolute !important;
-  width: 64px !important;
-  height: 20px !important;
+  width: 44px !important;
+  height: 14px !important;
   pointer-events: auto !important;
   cursor: pointer;
   z-index: 20;
@@ -6432,12 +6432,12 @@ body.no-shake .boost-timer-badge.super-50x {
   position: absolute;
   bottom: 0;
   left: 50%;
-  width: 44px;
-  height: 12px;
-  margin-left: -22px;
+  width: 28px;
+  height: 8px;
+  margin-left: -14px;
   border-radius: 50%;
   background: radial-gradient(ellipse, rgba(255, 23, 68, 0.85) 0%, transparent 75%);
-  box-shadow: 0 0 12px rgba(255, 23, 68, 0.7);
+  box-shadow: 0 0 8px rgba(255, 23, 68, 0.7);
   animation: none;
 }
 
@@ -6446,9 +6446,9 @@ body.no-shake .boost-timer-badge.super-50x {
   position: absolute;
   left: 50%;
   bottom: 2px;
-  width: 4px;
-  height: 42px;
-  margin-left: -2px;
+  width: 3px;
+  height: 26px;
+  margin-left: -1.5px;
   background: linear-gradient(180deg, #ff8a9a 0%, rgba(255, 23, 68, 0.9) 60%, rgba(255, 23, 68, 0.35) 100%);
   filter: blur(0.5px);
   border-radius: 2px;
@@ -6464,28 +6464,28 @@ body.no-shake .boost-timer-badge.super-50x {
 .elden-stop-disc {
   position: absolute;
   left: 50%;
-  bottom: 40px;
-  width: 58px;
-  height: 58px;
-  margin-left: -29px;
+  bottom: 26px;
+  width: 38px;
+  height: 38px;
+  margin-left: -19px;
   border-radius: 50%;
   background: radial-gradient(circle, #ff1744 20%, #8b0000 80%);
-  box-shadow: 0 0 14px rgba(255, 23, 68, 0.8), inset 0 0 10px rgba(255, 138, 154, 0.6);
-  filter: drop-shadow(0 0 16px rgba(255, 0, 40, 0.85));
+  box-shadow: 0 0 10px rgba(255, 23, 68, 0.8), inset 0 0 7px rgba(255, 138, 154, 0.6);
+  filter: drop-shadow(0 0 10px rgba(255, 0, 40, 0.85));
   transition: filter 0.8s, background 0.8s, box-shadow 0.8s;
 }
 
 /* Counter-rotating neon Dyson rings — STATIC (never spin) until player taps the stop */
 .elden-ring {
   position: absolute;
-  inset: -9px;
+  inset: -6px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 23, 68, 0.95);
-  box-shadow: 0 0 8px rgba(255, 23, 68, 0.9);
+  border: 1.5px solid rgba(255, 23, 68, 0.95);
+  box-shadow: 0 0 5px rgba(255, 23, 68, 0.9);
   pointer-events: none;
 }
 .elden-ring.elden-ring-a { animation: none; }
-.elden-ring.elden-ring-b { inset: -17px; border-color: rgba(255, 138, 154, 0.8); animation: none; }
+.elden-ring.elden-ring-b { inset: -12px; border-color: rgba(255, 138, 154, 0.8); animation: none; }
 @keyframes eldenRingSpinA {
   0% { transform: rotateX(68deg) rotateZ(0deg); }
   100% { transform: rotateX(68deg) rotateZ(360deg); }
@@ -6498,25 +6498,25 @@ body.no-shake .boost-timer-badge.super-50x {
 /* Billboard core: golden EB coin ringed by ruby crystals */
 .elden-disc-core {
   position: absolute;
-  inset: 10px;
+  inset: 7px;
   border-radius: 50%;
   background: radial-gradient(circle, #2a060c 0%, #120206 100%);
-  border: 1.5px solid rgba(224, 168, 79, 0.85);
-  box-shadow: 0 0 10px rgba(224, 168, 79, 0.55), inset 0 0 8px rgba(0, 0, 0, 0.9);
+  border: 1.2px solid rgba(224, 168, 79, 0.85);
+  box-shadow: 0 0 7px rgba(224, 168, 79, 0.55), inset 0 0 5px rgba(0, 0, 0, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: visible;
 }
 .elden-core-coin {
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
   object-fit: contain;
-  filter: drop-shadow(0 0 4px rgba(224, 168, 79, 0.9));
+  filter: drop-shadow(0 0 3px rgba(224, 168, 79, 0.9));
 }
 .elden-ruby {
   position: absolute;
-  font-size: 8px;
+  font-size: 6px;
   line-height: 1;
   color: #ff4d6d;
   text-shadow: 0 0 5px #ff1744;
@@ -6577,13 +6577,13 @@ body.no-shake .boost-timer-badge.super-50x {
 /* Spire tip above the disc (Citadel-style standing 3D silhouette) — STATIC */
 .elden-spire-tip {
   position: absolute;
-  bottom: 100px;
+  bottom: 64px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 15px;
+  font-size: 11px;
   line-height: 1;
   color: #ff1744;
-  text-shadow: 0 0 8px #fff, 0 0 14px rgba(255, 23, 68, 0.95);
+  text-shadow: 0 0 6px #fff, 0 0 10px rgba(255, 23, 68, 0.95);
   animation: none;
   pointer-events: none;
 }
@@ -6591,16 +6591,16 @@ body.no-shake .boost-timer-badge.super-50x {
 /* Floating beacon nameplate */
 .elden-stop-plate {
   position: absolute;
-  bottom: 122px;
+  bottom: 78px;
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: 7px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   color: #ffd7de;
-  text-shadow: 0 0 6px rgba(255, 23, 68, 0.9), 0 1px 2px #000;
+  text-shadow: 0 0 4px rgba(255, 23, 68, 0.9), 0 1px 2px #000;
   pointer-events: none;
 }
 
@@ -6647,16 +6647,16 @@ body.no-shake .boost-timer-badge.super-50x {
 .elden-stop-marker.cooling .elden-core-coin { opacity: 0.35; }
 
 /* DOM-Level LOD: far beacons are static, animation-free billboards */
-.elden-stop-marker.far { width: 40px !important; height: 20px !important; }
-.elden-stop-marker.far .elden-ground-pulse { width: 22px; height: 7px; margin-left: -11px; animation: none; }
-.elden-stop-marker.far .elden-beam { height: 22px; bottom: 2px; width: 2.5px; margin-left: -1.25px; animation: none; }
-.elden-stop-marker.far .elden-stop-disc { width: 34px; height: 34px; margin-left: -17px; bottom: 22px; filter: none; }
-.elden-stop-marker.far .elden-spire-tip { bottom: 58px; font-size: 10px; animation: none; }
+.elden-stop-marker.far { width: 28px !important; height: 14px !important; }
+.elden-stop-marker.far .elden-ground-pulse { width: 16px; height: 5px; margin-left: -8px; animation: none; }
+.elden-stop-marker.far .elden-beam { height: 16px; bottom: 2px; width: 2px; margin-left: -1px; animation: none; }
+.elden-stop-marker.far .elden-stop-disc { width: 24px; height: 24px; margin-left: -12px; bottom: 16px; filter: none; }
+.elden-stop-marker.far .elden-spire-tip { bottom: 40px; font-size: 8px; animation: none; }
 .elden-stop-marker.far .elden-ring,
 .elden-stop-marker.far .elden-ruby,
 .elden-stop-marker.far .elden-stop-plate { display: none; }
-.elden-stop-marker.far .elden-core-coin { width: 16px; height: 16px; }
-.elden-stop-marker.far .elden-disc-core { inset: 7px; }
+.elden-stop-marker.far .elden-core-coin { width: 11px; height: 11px; }
+.elden-stop-marker.far .elden-disc-core { inset: 5px; }
 
 /* ============================================================
    FAR-ZOOM CULL (body.map-culled-far)
@@ -7086,7 +7086,7 @@ body.birds-eye-mode .top-hud-row {
 }
 
 /* ---------- Construction Phase (Citadel-style growth billboard) ---------- */
-.elden-stop-marker.building { width: 96px !important; height: 20px !important; }
+.elden-stop-marker.building { width: 64px !important; height: 14px !important; }
 .elden-construct-anchor {
   position: absolute;
   inset: 0;
@@ -7188,8 +7188,8 @@ body.birds-eye-mode .top-hud-row {
   letter-spacing: 1.4px;
   color: var(--text-dim);
 }
-.elden-stop-marker.building.far { width: 64px !important; height: 20px !important; }
-.elden-stop-marker.building.far .elden-construct-billboard { transform: translateX(-50%) scale(0.78); transform-origin: bottom center; }
+.elden-stop-marker.building.far { width: 44px !important; height: 14px !important; }
+.elden-stop-marker.building.far .elden-construct-billboard { transform: translateX(-50%) scale(0.6); transform-origin: bottom center; }
 
 /* Golden activation burst when the beacon goes ONLINE */
 .elden-stop-marker.just-built .elden-stop-disc {
@@ -7258,13 +7258,13 @@ body.birds-eye-mode .top-hud-row {
 }
 
 .pet-hud-icon {
-  font-size: 22px;
+  font-size: clamp(16px, 4.5vw, 22px);
   filter: drop-shadow(0 0 6px rgba(79, 214, 196, 0.6));
 }
 
 .pet-hud-3d-container {
-  width: 40px;
-  height: 40px;
+  width: clamp(30px, 8vw, 40px);
+  height: clamp(30px, 8vw, 40px);
   position: absolute;
   top: 50%;
   left: 50%;

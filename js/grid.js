@@ -877,12 +877,12 @@ const Grid = (() => {
         const avatar = isSelf ? (state.player.avatar || "🙂") : (rep.avatar || "🙂");
 
         const innerContent = avatar.startsWith("img:")
-          ? `<img src="${avatar.slice(4)}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;display:block;">`
-          : `<span style="font-size:15px;line-height:1;">${avatar}</span>`;
+          ? `<img src="${avatar.slice(4)}" style="width:18px;height:18px;border-radius:50%;object-fit:cover;display:block;">`
+          : `<span style="font-size:11px;line-height:1;">${avatar}</span>`;
 
         // Count badge if more than 1 tile connected
         const countBadge = cluster.length > 1
-          ? `<span style="position:absolute;bottom:-4px;right:-4px;background:#d4af61;color:#0b1118;font-size:10px;font-weight:800;border-radius:10px;padding:1px 5px;box-shadow:0 0 4px rgba(0,0,0,0.9);line-height:1.2;">${cluster.length}</span>`
+          ? `<span style="position:absolute;bottom:-3px;right:-3px;background:#d4af61;color:#0b1118;font-size:8px;font-weight:800;border-radius:8px;padding:0 4px;box-shadow:0 0 3px rgba(0,0,0,0.9);line-height:1.3;">${cluster.length}</span>`
           : "";
 
         const el = document.createElement("div");
