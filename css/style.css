@@ -309,7 +309,7 @@ html,body{
 #topbar{
   position:absolute; top:0; left:0; right:0; z-index:5;
   padding: calc(max(12px, env(safe-area-inset-top)) + 4px) 14px 10px;
-  background: rgba(0, 0, 0, 0.5);
+  background: transparent;
   display:flex; flex-direction:column; gap:8px;
   pointer-events:none;
 }
@@ -325,7 +325,7 @@ html,body{
   border-radius: 0 !important;
   
   /* 2. Apply your custom frame */
-  background: rgba(0, 0, 0, 0.5) url('../assets/topbar-frame.png') no-repeat center center / 100% 100%;
+  background: url('../assets/topbar-frame.png') no-repeat center center / 100% 100%;
   
   /* 3. Padding to keep the text inside the red lines */
   padding: clamp(6px, 2vw, 10px) clamp(12px, 4vw, 24px) clamp(8px, 2.5vw, 12px) clamp(12px, 4vw, 24px);
@@ -431,7 +431,7 @@ html,body{
 }
 .sub-stat{
   flex:1;
-  background: rgba(0, 0, 0, 0.5) url('../assets/substat-chip.png') no-repeat center center / 100% 100%;
+  background: url('../assets/substat-chip.png') no-repeat center center / 100% 100%;
   border:none;
   border-radius:0;
   padding:4px 6px;
@@ -453,7 +453,7 @@ html,body{
 
 /* 2. Player Chip (Avatar + Name on the left) */
 .player-chip {
-  background: rgba(0, 0, 0, 0.5) url('../assets/substat-player-avatar.png') no-repeat center center / 100% 100%;
+  background: url('../assets/substat-player-avatar.png') no-repeat center center / 100% 100%;
   border: none !important;
   border-radius: 0 !important;
   height: 38px;
@@ -6989,6 +6989,31 @@ body.birds-eye-mode .top-hud-row {
 @keyframes eldenHintPulse {
   0%, 100% { opacity: 0.65; }
   50% { opacity: 1; }
+}
+
+/* Tap to Spin button — for desktop / accessibility */
+.elden-tap-spin-btn {
+  margin: 4px auto 0;
+  display: block;
+  padding: 8px 28px;
+  font-family: var(--font-display, 'Cinzel', serif);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(255, 23, 68, 0.85), rgba(139, 0, 0, 0.9));
+  border: 1.5px solid rgba(255, 138, 154, 0.7);
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 14px rgba(255, 23, 68, 0.5);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.elden-tap-spin-btn:active {
+  transform: scale(0.94);
+  box-shadow: 0 0 20px rgba(255, 23, 68, 0.8);
+}
+.elden-tap-spin-btn.hidden {
+  display: none;
 }
 
 .elden-cooldown-banner {

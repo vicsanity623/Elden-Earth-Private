@@ -347,6 +347,8 @@ const EldenStops = (() => {
     }
     const hint = document.getElementById("elden-swipe-hint");
     if (hint) hint.textContent = "Swipe the Dyson Disc to absorb its energy!";
+    const tapBtn = document.getElementById("elden-tap-spin-btn");
+    if (tapBtn) tapBtn.classList.add("hidden");
     
     const overlay = document.getElementById("elden-stop-overlay");
     if (overlay) overlay.classList.add("hidden");
@@ -368,11 +370,13 @@ const EldenStops = (() => {
     const disc = document.getElementById("elden-spin-disc");
     const banner = document.getElementById("eld-cooldown-banner");
     const hint = document.getElementById("elden-swipe-hint");
+    const tapBtn = document.getElementById("elden-tap-spin-btn");
     if (!disc || !banner) return;
     const cooling = onCooldown(selectedStopId);
     disc.classList.toggle("cooldown", cooling);
     banner.classList.toggle("hidden", !cooling);
     if (hint) hint.classList.toggle("hidden", cooling);
+    if (tapBtn) tapBtn.classList.toggle("hidden", cooling);
     if (cooling) {
       const t = document.getElementById("eld-cooldown-time");
       if (t) t.textContent = formatCooldown(selectedStopId);
@@ -394,7 +398,7 @@ const EldenStops = (() => {
       dragging = true;
       startX = e.clientX;
       velocity = 0;
-      discEl.setPointerCapture(e.pointerId);
+      try { discEl.setPointerCapture(e.pointerId); } catch (_) {}
     });
 
     discEl.addEventListener("pointermove", (e) => {
@@ -407,8 +411,9 @@ const EldenStops = (() => {
     });
 
     const release = () => {
-      if (!dragging || spinning) return;
+      if (!dragging) return;
       dragging = false;
+      if (spinning) return;
       if (Math.abs(velocity) > 15) {
         triggerDiscSpin();
       } else {
@@ -426,6 +431,33 @@ const EldenStops = (() => {
 
     discEl.addEventListener("pointerup", release);
     discEl.addEventListener("pointercancel", release);
+    discEl.addEventListener("pointerleave", release);
+
+    // Prevent context menu / text selection during swipe
+    discEl.addEventListener("contextmenu", (e) => e.preventDefault());
+    discEl.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
+  }
+
+  // Auto-spin: simulate a swipe gesture for Tap to Spin button
+  function autoSpinDisc() {
+    if (spinning || !selectedStopId) return;
+    const discEl = document.getElementById("elden-spin-disc");
+    if (!discEl) return;
+    // Animate a quick rotation to simulate swipe, then trigger spin
+    let angle = 0;
+    const steps = 8;
+    let step = 0;
+    const animate = () => {
+      if (step >= steps || spinning) {
+        triggerDiscSpin();
+        return;
+      }
+      angle += 40;
+      discEl.style.transform = `rotateY(${angle}deg)`;
+      step++;
+      requestAnimationFrame(animate);
+    };
+    animate();
   }
 
   function triggerDiscSpin() {
@@ -454,6 +486,8 @@ const EldenStops = (() => {
     }
     const hint = document.getElementById("elden-swipe-hint");
     if (hint) hint.textContent = "Absorbing crimson energy…";
+    const tapBtn = document.getElementById("elden-tap-spin-btn");
+    if (tapBtn) tapBtn.classList.add("hidden");
 
     // 2.5s cinematic rotation, server validated while the disc twirls
     setTimeout(() => {
@@ -931,6 +965,7 @@ const EldenStops = (() => {
     wireDiscPhysics();
 
     document.getElementById("elden-stop-close")?.addEventListener("click", closeStopSession);
+    document.getElementById("elden-tap-spin-btn")?.addEventListener("click", autoSpinDisc);
     document.getElementById("claim-lucky-plot-btn")?.addEventListener("click", closeLuckyPlotModal);
     document.getElementById("lucky-plot-close")?.addEventListener("click", closeLuckyPlotModal);
 
