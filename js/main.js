@@ -1989,6 +1989,9 @@
       locEl.classList.remove("marquee-active");
       void locEl.offsetWidth; // force reflow
       if (locEl.scrollWidth > locEl.clientWidth) {
+        // Calculate exact scroll distance so the flag/text end becomes visible
+        const overflow = locEl.scrollWidth - locEl.clientWidth;
+        locEl.style.setProperty("--marquee-shift", `-${overflow + 6}px`);
         locEl.classList.add("marquee-active");
       }
 

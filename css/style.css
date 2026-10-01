@@ -3400,6 +3400,7 @@ html,body{
   position: relative;
   width: clamp(100px, 28vw, 130px);
   height: clamp(108px, 30vw, 140px);
+  overflow: hidden;
 }
 
 .landlord-ruler-img {
@@ -3443,13 +3444,16 @@ html,body{
   text-transform: uppercase;
   color: var(--gold);
   text-align: left;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .landlord-ruler-location {
   position: absolute;
-  bottom: 15px;
-  left: 17px;
-  right: 8px;
+  bottom: 14px;
+  left: 14px;
+  right: 14px;
   font-size: clamp(7px, 2.0vw, 9.4px);
   font-weight: 700;
   color: var(--parchment);
@@ -3457,19 +3461,17 @@ html,body{
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
+  text-overflow: clip;
 }
 
 .landlord-ruler-location.marquee-active {
-  animation: landlordMarquee 6s linear infinite;
+  animation: landlordMarquee 8s ease-in-out infinite;
 }
 
 @keyframes landlordMarquee {
-  0%   { transform: translateX(0); }
-  10%  { transform: translateX(0); }
-  40%  { transform: translateX(-100%); }
-  60%  { transform: translateX(-100%); }
-  90%  { transform: translateX(0); }
-  100% { transform: translateX(0); }
+  0%, 15%   { transform: translateX(0); }
+  45%, 65%  { transform: translateX(var(--marquee-shift, -30px)); }
+  95%, 100% { transform: translateX(0); }
 }
 
 /* Clean map while buying: hide every HUD element except the top banner */
