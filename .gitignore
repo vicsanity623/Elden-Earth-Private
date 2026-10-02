@@ -9,8 +9,14 @@ android/app/debug/
 *.keystore
 google-services.json
 
+# Peer
+SCPR.md
+PEER.md
+
 # Firebase
 .firebase/
+firestore.rules
+storage.rules
 functions/
 *.service-account.json
 server/access-control.log
