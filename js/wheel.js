@@ -215,8 +215,8 @@ let spinTimeoutId = null;
       : -1;
     const targetIndex = forcedIndex >= 0 ? forcedIndex : pickWeightedIndex();
 
-    // Cryptographically randomized needle landing angle within slice
-    const jitter = (cryptoRandom() - 0.5) * (sliceDeg * 0.75);
+    // Minimal jitter — keep needle landing visibly within the target slice
+    const jitter = (cryptoRandom() - 0.5) * (sliceDeg * 0.35);
     const targetCenter = targetIndex * sliceDeg + sliceDeg / 2 + jitter;
 
     // Cryptographically randomized spin force (5 to 8 full rotations)

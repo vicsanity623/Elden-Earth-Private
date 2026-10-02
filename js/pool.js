@@ -154,13 +154,32 @@ const WeeklyPool = (() => {
     }
   }
 
-  function claimWeeklyReward() {
+  async function claimWeeklyReward() {
     if (pendingRewardAmount <= 0) return;
     const state = Store.get();
     const currentWeekId = getISOWeekId();
 
-    state.cash = (Number(state.cash) || 0) + pendingRewardAmount;
-    state.lifetimeRent = (Number(state.lifetimeRent) || 0) + pendingRewardAmount;
+    // Server-authoritative claim — prevents client-side cash forging
+    if (typeof ServerAntiCheat !== "undefined" && ServerAntiCheat.isReady()) {
+      try {
+        const result = await ServerAntiCheat.claimWeeklyPool();
+        if (!result || !result.claimed) {
+          if (typeof showToast === "function") showToast("⚠️ Pool claim could not be verified.", 3000);
+          return;
+        }
+        if (typeof result.newCash === "number") state.cash = result.newCash;
+        if (typeof result.newLifetimeRent === "number") state.lifetimeRent = result.newLifetimeRent;
+      } catch (e) {
+        console.warn("[Pool] Server claim failed:", e);
+        if (typeof showToast === "function") showToast("⚠️ Pool claim failed. Try again.", 3000);
+        return;
+      }
+    } else {
+      // Offline fallback — only allow if player has no cloud sync capability
+      state.cash = (Number(state.cash) || 0) + pendingRewardAmount;
+      state.lifetimeRent = (Number(state.lifetimeRent) || 0) + pendingRewardAmount;
+    }
+
     state.lastWeeklyPoolClaim = currentWeekId;
     Store.save(true);
 

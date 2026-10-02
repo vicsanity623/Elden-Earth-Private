@@ -86,7 +86,6 @@ const CONFIG = {
     { type: "eb",              amount: 1,  label: "1 EB",  color: "#4fd6c4", weight: 240 },
     { type: "diamond_jackpot", amount: 12, label: "+12 ◆", color: "#4fd6c4", weight: 20  }, // 💎 +12 Diamond Jackpot!
     { type: "eb",              amount: 2,  label: "2 EB",  color: "#4f9dd6", weight: 130 },
-    { type: "diamond",         amount: 1,  label: "+1 ◆",  color: "#8fa3b8", weight: 110 },
     { type: "eb",              amount: 5,  label: "5 EB",  color: "#a86ee0", weight: 50  },
     { type: "eb",              amount: 7,  label: "7 EB",  color: "#ff4757", weight: 35  }, // 🍀 Lucky 7 EB Slice!
     { type: "eb",              amount: 25, label: "25 EB", color: "#e0a84f", weight: 15  },

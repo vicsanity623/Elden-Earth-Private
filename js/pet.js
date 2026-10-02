@@ -821,10 +821,8 @@ const CompanionPet = (() => {
       const state = Store.get();
       if (!state.pet || !state.pet.unlocked) return;
 
-      const now = Date.now();
-      const hoursSinceLastFed = (now - (state.pet.lastFedAt || now)) / 3600000;
-      const moodLoss = hoursSinceLastFed * MOOD_DECAY_PER_HOUR;
-
+      // Linear per-minute decay: MOOD_DECAY_PER_HOUR / 60 per tick
+      const moodLoss = MOOD_DECAY_PER_HOUR / 60;
       state.pet.mood = Math.max(0, (state.pet.mood || 0) - moodLoss);
       Store.save(false);
 
