@@ -3281,8 +3281,12 @@
       setTimeout(() => {
         const treasuryAd = el("treasury-ad-container");
         if (treasuryAd && !document.body.classList.contains("buy-mode")) {
-          treasuryAd.innerHTML = `<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-5972331036113330" data-ad-slot="4287691766"></ins>`;
-          try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+          // Only inject if no ad is already loaded
+          const existingAd = treasuryAd.querySelector("ins.adsbygoogle");
+          if (!existingAd || existingAd.getAttribute("data-ad-status") === "unfilled") {
+            treasuryAd.innerHTML = `<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-5972331036113330" data-ad-slot="4287691766"></ins>`;
+            try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+          }
         }
       }, 500);
 
@@ -3480,11 +3484,15 @@
         if (document.hidden || document.body.classList.contains("buy-mode")) return;
 
         try {
-          // SPA Safe Refresh: Completely destroy and recreate the tag to prevent Google TagError
-          adContainer.innerHTML = `<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-5972331036113330" data-ad-slot="4287691766"></ins>`;
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          // SPA Safe Refresh: Destroy and recreate only if ad is unfilled or stale
+          const existingAd = adContainer.querySelector("ins.adsbygoogle");
+          const adFilled = existingAd && existingAd.getAttribute("data-ad-status") !== "unfilled" && existingAd.offsetHeight > 10;
+          if (!adFilled) {
+            adContainer.innerHTML = `<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-5972331036113330" data-ad-slot="4287691766"></ins>`;
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+            console.log("[AdSense] Refreshed treasury banner (was unfilled).");
+          }
           lastAdRefreshTime = Date.now();
-          console.log("[AdSense] Refreshed treasury banner successfully.");
         } catch (e) {
           console.warn("[AdSense] Refresh notice:", e);
         }
