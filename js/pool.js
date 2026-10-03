@@ -43,9 +43,9 @@ const WeeklyPool = (() => {
     // Fast Rarity Rate Lookup Table
     const RATE_MAP = {
       common: 0.0000000008,
-      rare: 0.00000000135,
-      epic: 0.0000000022,
-      legendary: 0.0000000044
+      rare: 0.000000002428,
+      epic: 0.000000007365,
+      legendary: 0.000000022330
     };
     // Calculate global lifetime rent AND global velocity
     // --- 14-Day (2-Week) Fiscal Period Reset Engine ---
@@ -63,7 +63,7 @@ const WeeklyPool = (() => {
         for (const tid in p.plots) {
           const plot = p.plots[tid];
           const rKey = plot.rarity?.key || plot.rarity || "common";
-          const rate = RATE_MAP[rKey] || 0.0000000022;
+          const rate = RATE_MAP[rKey] || 0.000000007365;
 
           // Safe timestamp check
           let plotClaimedTime = Number(plot.claimedAt) || periodStartTime;
@@ -77,7 +77,7 @@ const WeeklyPool = (() => {
           globalRateSec += rate;
         }
       } else if (p.plotsCount) {
-        const fallbackRate = p.plotsCount * 0.0000000022;
+        const fallbackRate = p.plotsCount * 0.000000007365;
         const periodSec = Math.min(MAX_PERIOD_SEC, Math.max(0, (now - periodStartTime) / 1000));
         totalGlobalRent += (periodSec * fallbackRate);
         globalRateSec += fallbackRate;
