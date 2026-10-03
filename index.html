@@ -211,7 +211,7 @@
     <div class="hero-balance-card" id="hero-balance-card">
       <div class="hero-top-line">
         <div class="hero-brand-title">
-          <span class="hero-brand-gem">◆</span> ELDEN EARTH <span class="hero-version-tag">0.1.11.13b</span>
+          <span class="hero-brand-gem">◆</span> ELDEN EARTH <span class="hero-version-tag">0.1.11.20b</span>
         </div>
         <div id="boost-timer-badge" class="boost-timer-badge hidden">⚡ 30X BOOST <span id="boost-countdown">00:00:00</span></div>
       </div>
@@ -510,6 +510,7 @@
       <div><i class="swatch epic"></i>Epic (<span id="count-epic">-</span>) — <span id="weight-epic">0</span>% — $<span id="rate-epic">0</span>/s</div>
       <div><i class="swatch legendary"></i>Legendary (<span id="count-legendary">-</span>) — <span id="weight-legendary">0</span>% — $<span id="rate-legendary">0</span>/s</div>
     </div>
+    <button id="ascension-forge-btn" class="btn btn-primary" style="margin-bottom:12px;">⚒ Ascension Forge</button>
     <p class="fine-print">Tap any unclaimed tile on the map (zoom in close) to buy it for 100 EB. Rarity is random — % shown is your personal breakdown of owned plots by rarity.</p>
   </div>
 </div>
@@ -779,6 +780,9 @@
     <div class="citadel-stats-box">
       <div class="stat-row"><span>Mining Rate:</span><strong id="plot-modal-rate" class="teal-text">0 EB / sec</strong></div>
       <div class="stat-row"><span>Location:</span><strong id="plot-modal-location" class="gold-text">Unknown</strong></div>
+    </div>
+    <div class="citadel-relocate-wrap" id="plot-ascend-wrap" style="margin-top:10px;">
+      <button id="plot-ascend-btn" class="citadel-relocate-btn" type="button" style="display: none;">⚒ Ascend</button>
     </div>
   </div>
 </div>
@@ -1322,6 +1326,138 @@
   </div>
 </div>
 
+<!-- ===================== PLOT ASCENSION FORGE MODAL ===================== -->
+<div id="ascension-modal" class="modal hidden">
+  <div class="modal-card ascension-card">
+    <button class="close-btn" data-close="ascension-modal">✕</button>
+    <div class="forge-icon">⚒</div>
+    <h2>Ascension Forge</h2>
+    <p class="modal-sub">Sacrifice 3 plots of the same rarity to ascend 1 plot on the map.</p>
+
+    <div class="forge-comparison-box">
+      <div class="forge-tier-col">
+        <span class="forge-col-sub">Current Tier</span>
+        <strong id="asc-from-tier" class="forge-tier-badge">Common</strong>
+        <span id="asc-from-rate" class="forge-perk-text">$0.0000000008 /s</span>
+      </div>
+      <div class="forge-arrow">➔</div>
+      <div class="forge-tier-col">
+        <span class="forge-col-sub">Ascended Tier</span>
+        <strong id="asc-to-tier" class="forge-tier-badge">Rare</strong>
+        <span id="asc-to-rate" class="forge-perk-text">$0.00000000135 /s</span>
+      </div>
+    </div>
+
+    <div id="asc-selection-status" class="asc-selection-status">
+      <div class="asc-slot" data-role="target">
+        <span class="asc-slot-label">Target</span>
+        <span id="asc-slot-target" class="asc-slot-value">— select on map —</span>
+      </div>
+      <div class="asc-slot" data-role="sac1">
+        <span class="asc-slot-label">Sacrifice 1</span>
+        <span id="asc-slot-sac1" class="asc-slot-value">—</span>
+      </div>
+      <div class="asc-slot" data-role="sac2">
+        <span class="asc-slot-label">Sacrifice 2</span>
+        <span id="asc-slot-sac2" class="asc-slot-value">—</span>
+      </div>
+    </div>
+
+    <div id="asc-cost-box" class="asc-cost-box">
+      <div class="asc-cost-row"><span>EB Cost</span><strong id="asc-cost-eb">50 EB</strong></div>
+      <div class="asc-cost-row"><span>Cash Sink</span><strong id="asc-cost-cash">$0.25</strong></div>
+      <div class="asc-cost-row"><span>Your Balance</span><strong id="asc-cost-balance">—</strong></div>
+    </div>
+
+    <div class="forge-timer-notice asc-warning">
+      <span>⚠️ Sacrificed plots are <strong>permanently destroyed</strong>. Their tiles return to the public grid. This cannot be undone.</span>
+    </div>
+
+    <div id="asc-info-panel" class="ascension-info-panel">
+      <strong>How Ascension Works</strong><br>
+      Select <strong>1 Target plot</strong> and <strong>2 Sacrifice plots</strong> of the same rarity on the map (within your 75m reach).<br><br>
+      <strong>The Math:</strong> 3 Common → 1 Rare · 3 Rare → 1 Epic · 3 Epic → 1 Legendary.<br>
+      Gathering 1 Legendary from scratch requires 27 base Common plots — every roll brings you closer.<br><br>
+      <strong>Absorb &amp; Vacate:</strong> The Target plot upgrades in place. Sacrificed tiles are wiped clean and become unclaimed land for the community — stopping hoarding and recycling the map.<br><br>
+      <strong>Economy:</strong> Ascension burns EB and real simulated Cash. Raw income may drop (prestige &gt; rent), but you free plot-cap space, boost Citadel prestige, and lock in a flex-worthy Legendary.<br><br>
+      <strong>Every Common is a crafting material.</strong> No plot is trash.
+    </div>
+
+    <div id="asc-locked-notice" class="forge-locked-notice hidden"></div>
+
+    <div class="modal-actions">
+      <button id="asc-select-btn" class="btn btn-primary">🗺 Choose Plots on Map</button>
+      <button id="asc-confirm-btn" class="btn btn-primary hidden">⚒ Ascend Plot</button>
+      <button id="asc-cancel-btn" class="btn btn-secondary">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ASCENSION COMPLETE MODAL ===================== -->
+<div id="ascension-complete-modal" class="modal hidden">
+  <div class="modal-card ascension-complete-card">
+    <button class="close-btn" data-close="ascension-complete-modal">✕</button>
+    <div id="asc-complete-burst" class="asc-complete-burst"></div>
+    <div class="forge-icon asc-complete-icon">✦</div>
+    <h2 class="asc-complete-title">ASCENSION COMPLETE</h2>
+    <p class="modal-sub" id="asc-complete-sub">Your plot has been reforged.</p>
+
+    <div class="asc-complete-rarity-box">
+      <span class="asc-complete-rarity-label">New Plot Rarity</span>
+      <strong id="asc-complete-rarity" class="asc-complete-rarity-badge">RARE</strong>
+      <span id="asc-complete-rate" class="asc-complete-rate">$0.00000000135 /s</span>
+    </div>
+
+    <div class="asc-complete-stats">
+      <div class="asc-stat-col">
+        <span class="asc-stat-label">Before</span>
+        <strong id="asc-before-income" class="asc-stat-val">—</strong>
+        <span class="asc-stat-sub">income / sec</span>
+        <strong id="asc-before-plots" class="asc-stat-val-sm">—</strong>
+        <span class="asc-stat-sub">plots owned</span>
+      </div>
+      <div class="asc-stat-arrow">➔</div>
+      <div class="asc-stat-col">
+        <span class="asc-stat-label">After</span>
+        <strong id="asc-after-income" class="asc-stat-val">—</strong>
+        <span class="asc-stat-sub">income / sec</span>
+        <strong id="asc-after-plots" class="asc-stat-val-sm">—</strong>
+        <span class="asc-stat-sub">plots owned</span>
+      </div>
+    </div>
+
+    <div id="asc-income-delta" class="asc-income-delta"></div>
+
+    <div class="asc-complete-cost">
+      <span>Forge Cost Paid</span>
+      <strong id="asc-complete-cost">—</strong>
+    </div>
+
+    <div class="modal-actions">
+      <button id="asc-complete-close-btn" class="btn btn-primary">Claim Glory</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ascension particle FX canvas (full-screen, non-interactive) -->
+<canvas id="ascension-fx-canvas" class="ascension-fx-canvas hidden"></canvas>
+
+<!-- Ascension map-selection HUD (visible only in map pick mode) -->
+<div id="ascension-map-hud" class="ascension-map-hud hidden">
+  <div class="asc-hud-title">⚒ ASCENSION FORGE — Pick 3 Plots</div>
+  <div class="asc-hud-progress">
+    <span id="asc-hud-target" class="asc-hud-chip">Target: —</span>
+    <span id="asc-hud-sac1" class="asc-hud-chip">Sac 1: —</span>
+    <span id="asc-hud-sac2" class="asc-hud-chip">Sac 2: —</span>
+  </div>
+  <div class="asc-hud-hint" id="asc-hud-hint">Tap your plot to set the Target. Then tap 2 more same-rarity plots as Sacrifices.</div>
+  <div class="asc-hud-actions">
+    <button id="asc-hud-clear-btn" class="btn btn-secondary">Clear</button>
+    <button id="asc-hud-done-btn" class="btn btn-primary" disabled>Done</button>
+    <button id="asc-hud-cancel-btn" class="btn btn-secondary">Cancel</button>
+  </div>
+</div>
+
 <!-- ===================== SIEGE REFLEX COMBAT MODAL ===================== -->
 <div id="siege-modal" class="modal hidden">
   <div class="modal-card siege-card">
@@ -1423,6 +1559,7 @@
 <script src="js/friends.js"></script>
 <script src="js/referrals.js"></script>
 <script src="js/server-anticheat.js"></script>
+<script src="js/plot-ascension.js"></script>
 <script src="js/profanity-filter.js"></script>
 <script src="js/pet.js"></script>
 <script src="js/main.js"></script>

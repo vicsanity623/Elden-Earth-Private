@@ -5288,6 +5288,385 @@ div[aria-label="Advertisement"] {
   border-radius: 0 !important;
 }
 
+/* ================= PLOT ASCENSION FORGE ================= */
+.ascension-card {
+  max-width: 420px;
+  text-align: center;
+}
+
+.asc-selection-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.asc-slot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.asc-slot[data-role="target"] {
+  border-color: rgba(255, 211, 138, 0.65);
+  box-shadow: 0 0 0 1px rgba(255, 211, 138, 0.15), 0 0 16px rgba(255, 211, 138, 0.08);
+}
+
+.asc-slot.filled-target {
+  border-color: #ff2b43;
+  background: rgba(255, 43, 67, 0.1);
+}
+
+.asc-slot.filled-sacrifice {
+  border-color: rgba(209, 73, 91, 0.8);
+  background: rgba(209, 73, 91, 0.08);
+}
+
+.asc-slot-label {
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.asc-slot-value {
+  font-size: 13px;
+  color: var(--parchment);
+  font-weight: 600;
+}
+
+.asc-cost-box {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin: 10px 0;
+  text-align: left;
+}
+
+.asc-cost-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin: 4px 0;
+}
+
+.asc-cost-row strong {
+  color: var(--gold-hi);
+  font-family: var(--font-display);
+}
+
+.asc-warning {
+  border: 1px dashed rgba(255, 43, 67, 0.55) !important;
+  background: rgba(255, 43, 67, 0.06) !important;
+  margin: 10px 0 !important;
+}
+
+.asc-warning span {
+  font-size: 12px !important;
+  color: #ffb3bd !important;
+}
+
+.ascension-info-panel {
+  text-align: left;
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.55;
+  background: var(--panel-2);
+  border: 1px dashed rgba(79, 214, 196, 0.35);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 10px 0;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.ascension-info-panel strong {
+  color: var(--parchment);
+}
+
+.ascension-info-panel::-webkit-scrollbar {
+  width: 4px;
+}
+.ascension-info-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 43, 67, 0.45);
+  border-radius: 4px;
+}
+
+/* ---------- Map selection HUD ---------- */
+.ascension-map-hud {
+  position: fixed;
+  left: 50%;
+  bottom: 88px;
+  transform: translateX(-50%);
+  z-index: 950;
+  width: min(94vw, 420px);
+  background: rgba(13, 20, 32, 0.94);
+  border: 1px solid rgba(255, 43, 67, 0.55);
+  border-radius: 16px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 24px rgba(255, 43, 67, 0.15);
+  backdrop-filter: blur(8px);
+  text-align: center;
+}
+
+.asc-hud-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--gold-hi);
+  letter-spacing: 0.6px;
+  margin-bottom: 8px;
+}
+
+.asc-hud-progress {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.asc-hud-chip {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--text-dim);
+}
+
+.asc-hud-chip.filled {
+  border-color: rgba(255, 211, 138, 0.7);
+  color: var(--parchment);
+  background: rgba(255, 211, 138, 0.1);
+}
+
+.asc-hud-chip.filled-target {
+  border-color: #ff2b43;
+  color: #fff;
+  background: rgba(255, 43, 67, 0.2);
+}
+
+.asc-hud-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.asc-hud-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.asc-hud-actions .btn {
+  flex: 1;
+  padding: 10px 8px !important;
+  font-size: 12px !important;
+}
+
+/* Map selection highlight layers use MapLibre paint props; DOM helper: */
+.ascension-map-hud.hidden { display: none !important; }
+
+/* ---------- Particle FX canvas ---------- */
+.ascension-fx-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 2000;
+}
+
+.ascension-fx-canvas.hidden { display: none !important; }
+
+/* ---------- Ascension Complete ---------- */
+.ascension-complete-card {
+  max-width: 400px;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.asc-complete-burst {
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.22), transparent 42%),
+    radial-gradient(circle at 50% 40%, rgba(255, 43, 67, 0.28), transparent 55%),
+    radial-gradient(circle at 50% 45%, rgba(255, 211, 138, 0.22), transparent 60%);
+  pointer-events: none;
+  animation: ascBurstPulse 2.4s ease-in-out infinite;
+  z-index: 0;
+}
+
+.ascension-complete-card > *:not(.asc-complete-burst):not(.close-btn) {
+  position: relative;
+  z-index: 1;
+}
+
+.asc-complete-icon {
+  font-size: 46px !important;
+  animation: ascIconSpin 3s ease-in-out infinite;
+}
+
+.asc-complete-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 2px;
+  background: linear-gradient(180deg, #ffffff 0%, #ff2b43 55%, #ff2b43 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 28px rgba(255, 43, 67, 0.45);
+  margin: 4px 0 6px;
+}
+
+.asc-complete-rarity-box {
+  margin: 14px 0 10px;
+  padding: 14px 12px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 43, 67, 0.08));
+  border: 1px solid rgba(255, 211, 138, 0.45);
+}
+
+.asc-complete-rarity-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.asc-complete-rarity-badge {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: #e0a84f;
+  text-shadow: 0 0 18px rgba(224, 168, 79, 0.65);
+  animation: rarityGlow 1.8s ease-in-out infinite;
+}
+
+.asc-complete-rate {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--teal);
+}
+
+.asc-complete-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.asc-stat-col {
+  flex: 1;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 8px;
+}
+
+.asc-stat-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.asc-stat-val {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--gold-hi);
+  word-break: break-all;
+}
+
+.asc-stat-val-sm {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--parchment);
+}
+
+.asc-stat-sub {
+  display: block;
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.asc-stat-arrow {
+  font-size: 22px;
+  color: var(--gold);
+  text-shadow: 0 0 12px rgba(255, 43, 67, 0.6);
+}
+
+.asc-income-delta {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 4px 0 10px;
+  min-height: 18px;
+}
+
+.asc-income-delta.up { color: #4fd6c4; }
+.asc-income-delta.down { color: #ffb3bd; }
+.asc-income-delta.flat { color: var(--text-dim); }
+
+.asc-complete-cost {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-dim);
+  background: var(--panel-2);
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.asc-complete-cost strong {
+  color: var(--gold-hi);
+  font-family: var(--font-display);
+}
+
+@keyframes ascBurstPulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes ascIconSpin {
+  0%, 100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 8px rgba(255,211,138,0.7)); }
+  50% { transform: rotate(12deg) scale(1.08); filter: drop-shadow(0 0 18px rgba(255,43,67,0.85)); }
+}
+
+@keyframes rarityGlow {
+  0%, 100% { text-shadow: 0 0 12px rgba(224, 168, 79, 0.45); }
+  50% { text-shadow: 0 0 28px rgba(224, 168, 79, 0.9), 0 0 40px rgba(255, 43, 67, 0.35); }
+}
+
 /* ---------- Diamond Extractor Upgrade Elements ---------- */
 .extractor-level-header {
   display: flex;

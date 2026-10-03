@@ -10,6 +10,9 @@ const Grid = (() => {
   let isBuyMode = false;
   let playerCoords = null;
   let selectedPlotId = null;
+  let isAscensionMode = false;
+  let ascensionSelections = [];
+  let onAscensionPick = null;
 
   function tileId(tx, ty) { return tx + "_" + ty; }
 
@@ -140,6 +143,12 @@ const Grid = (() => {
     const relocateBtn = document.getElementById("plot-relocate-btn");
     if (relocateBtn) {
       relocateBtn.style.display = (plot.ownerId === state.player?.id) ? "inline-block" : "none";
+    }
+    // Show Ascend button for own non-legendary plots
+    const ascendBtn = document.getElementById("plot-ascend-btn");
+    if (ascendBtn) {
+      const rKey = String(plot.rarity?.key || plot.rarity || "common").toLowerCase();
+      ascendBtn.style.display = (plot.ownerId === state.player?.id && rKey !== "legendary") ? "inline-block" : "none";
     }
     document.getElementById("plot-modal")?.classList.remove("hidden");
   }
@@ -785,6 +794,101 @@ const Grid = (() => {
       });
     }
 
+    // 2b. ASCENSION SELECTION OVERLAY — own plots within reach radius
+    const ascensionFeatures = [];
+    if (isAscensionMode && playerCoords) {
+      const ts = CONFIG.TILE_SIZE_METERS;
+      const radiusM = CONFIG.DIAMOND_COLLECT_RADIUS_METERS || 75;
+      const selMap = {};
+      ascensionSelections.forEach((s, i) => { selMap[s.tid] = i; });
+
+      for (const tid in allPlots) {
+        const plot = allPlots[tid];
+        if (!myPlayerId || plot.ownerId !== myPlayerId) continue;
+        const rKey = String(plot.rarity?.key || plot.rarity || "common").toLowerCase();
+        if (rKey === "legendary") continue;
+
+        const bounds = cachedTileBounds(plot.tx, plot.ty);
+        const cLat = (bounds[0][0] + bounds[2][0]) / 2;
+        const cLon = (bounds[0][1] + bounds[2][1]) / 2;
+        if (Geo.haversine(playerCoords.lat, playerCoords.lon, cLat, cLon) > radiusM) continue;
+
+        const coords = bounds.map(pt => [pt[1], pt[0]]);
+        coords.push(coords[0]);
+        const selIdx = selMap[tid];
+        let role = "eligible";
+        if (selIdx === 0) role = "target";
+        else if (selIdx > 0) role = "sacrifice";
+        // After target chosen, only same-rarity plots remain eligible
+        let selectable = true;
+        if (ascensionSelections.length > 0) {
+          const targetRarity = String(ascensionSelections[0].rarity || "").toLowerCase();
+          if (rKey !== targetRarity && role === "eligible") selectable = false;
+        }
+
+        ascensionFeatures.push({
+          type: "Feature",
+          properties: { tid, rarity: rKey, role, selectable, selIdx },
+          geometry: { type: "Polygon", coordinates: [coords] },
+        });
+      }
+    }
+
+    const ascensionGeoJSON = { type: "FeatureCollection", features: ascensionFeatures };
+
+    if (map.getSource("ascension-select-source")) {
+      map.getSource("ascension-select-source").setData(ascensionGeoJSON);
+    } else if (ascensionFeatures.length > 0 || isAscensionMode) {
+      map.addSource("ascension-select-source", { type: "geojson", data: ascensionGeoJSON });
+      map.addLayer({
+        id: "ascension-select-fill",
+        type: "fill",
+        source: "ascension-select-source",
+        paint: {
+          "fill-color": [
+            "case",
+            ["==", ["get", "role"], "target"], "#ff2b43",
+            ["==", ["get", "role"], "sacrifice"], "#d1495b",
+            ["==", ["get", "selectable"], true], "#ff2b43",
+            "#8fa3b8"
+          ],
+          "fill-opacity": [
+            "case",
+            ["==", ["get", "role"], "target"], 0.7,
+            ["==", ["get", "role"], "sacrifice"], 0.65,
+            ["==", ["get", "selectable"], true], 0.28,
+            0.08
+          ],
+        },
+      });
+      map.addLayer({
+        id: "ascension-select-line",
+        type: "line",
+        source: "ascension-select-source",
+        paint: {
+          "line-color": [
+            "case",
+            ["==", ["get", "role"], "target"], "#ffffff",
+            ["==", ["get", "role"], "sacrifice"], "#ffb3bd",
+            ["==", ["get", "selectable"], true], "#ff2b43",
+            "#4a5568"
+          ],
+          "line-width": [
+            "case",
+            ["==", ["get", "role"], "target"], 3.2,
+            ["==", ["get", "role"], "sacrifice"], 2.6,
+            ["==", ["get", "selectable"], true], 2.0,
+            1.0
+          ],
+          "line-dasharray": [
+            "case",
+            ["==", ["get", "role"], "target"], ["literal", [1, 0]],
+            ["literal", [2, 1.5]]
+          ],
+        },
+      });
+    }
+
     // 3. RENDER CLUSTERED AVATARS & EXTRACTOR BEACONS (1 Avatar per Connected Territory)
     if (zoom >= 14) {
       const visited = new Set();
@@ -976,6 +1080,113 @@ const Grid = (() => {
     scheduleRender();
   }
 
+  function handleAscensionClick(lngLat) {
+    if (!isAscensionMode || !onAscensionPick) return;
+    const ts = CONFIG.TILE_SIZE_METERS || 6.096;
+    const radiusM = CONFIG.DIAMOND_COLLECT_RADIUS_METERS || 75;
+    const { lng, lat } = lngLat;
+
+    if (playerCoords && playerCoords.lat) {
+      const dist = Geo.haversine(playerCoords.lat, playerCoords.lon, lat, lng);
+      if (dist > radiusM) {
+        if (typeof showToast === "function") {
+          showToast("🚶 Walk closer! That plot is outside your reach circle.", 2500);
+        }
+        return;
+      }
+    }
+
+    const t = Geo.tileForLatLon(lat, lng, ts);
+    const tid = tileId(t.tx, t.ty);
+    const plot = getAllPlots()[tid];
+    const state = Store.get();
+    if (!plot || plot.ownerId !== state.player?.id) {
+      if (typeof showToast === "function") {
+        showToast("⚠️ Select one of your own plots.", 2200);
+      }
+      return;
+    }
+    const rKey = String(plot.rarity?.key || plot.rarity || "common").toLowerCase();
+    if (rKey === "legendary") {
+      if (typeof showToast === "function") {
+        showToast("⚠️ Legendary plots cannot be used in the Forge.", 2500);
+      }
+      return;
+    }
+    // Enforce same-rarity after target is chosen
+    if (ascensionSelections.length > 0) {
+      const targetRarity = String(ascensionSelections[0].rarity || "").toLowerCase();
+      if (rKey !== targetRarity) {
+        if (typeof showToast === "function") {
+          showToast(`⚠️ Sacrifices must be ${targetRarity.toUpperCase()}.`, 2500);
+        }
+        return;
+      }
+      const already = ascensionSelections.some(s => s.tid === tid);
+      if (already) {
+        if (typeof showToast === "function") showToast("⚠️ That plot is already selected.", 2000);
+        return;
+      }
+    }
+
+    onAscensionPick({
+      tid,
+      tx: t.tx,
+      ty: t.ty,
+      rarity: rKey,
+      rate: plot.rate,
+    });
+    scheduleRender();
+  }
+
+  function setAscensionMode(active, opts = {}) {
+    isAscensionMode = !!active;
+    if (!active) {
+      ascensionSelections = [];
+      onAscensionPick = null;
+      // Clear overlay by emptying the source
+      if (map && map.getSource("ascension-select-source")) {
+        map.getSource("ascension-select-source").setData({ type: "FeatureCollection", features: [] });
+      }
+    } else {
+      if (opts.coords) playerCoords = opts.coords;
+      onAscensionPick = opts.onPick || null;
+      ascensionSelections = [];
+    }
+    scheduleRender();
+  }
+
+  function getAscensionSelections() {
+    return ascensionSelections.map(s => ({ ...s }));
+  }
+
+  function setAscensionSelections(list) {
+    ascensionSelections = Array.isArray(list) ? list.slice(0, 3) : [];
+    scheduleRender();
+  }
+
+  function getMap() {
+    return map;
+  }
+
+  function projectTid(tid) {
+    if (!map) return null;
+    const parts = String(tid || "").split("_");
+    const tx = parseInt(parts[0], 10);
+    const ty = parseInt(parts[1], 10);
+    if (!Number.isFinite(tx) || !Number.isFinite(ty)) return null;
+    const ts = CONFIG.TILE_SIZE_METERS || 6.096;
+    const b = Geo.tileBounds(tx, ty, ts);
+    const lat = (b[0][0] + b[2][0]) / 2;
+    const lon = (b[0][1] + b[2][1]) / 2;
+    try {
+      const p = map.project([lon, lat]);
+      return { x: p.x, y: p.y };
+    } catch (e) {
+      return null;
+    }
+  }
+
   function setGlobalPlot(tid, data) {
     globalPlots[tid] = data;
     scheduleRender();
@@ -1024,6 +1235,10 @@ const Grid = (() => {
     onBuyAttempt = callbacks.onBuyAttempt || onBuyAttempt;
 
     map.on("click", (e) => {
+      if (isAscensionMode) {
+        handleAscensionClick(e.lngLat);
+        return;
+      }
       if (!isBuyMode) return; // Only allow buying in Buy Land mode
       const { lng, lat } = e.lngLat;
       const ts = CONFIG.TILE_SIZE_METERS || 6.096;
@@ -1084,6 +1299,12 @@ const Grid = (() => {
 
     bagBtn?.addEventListener("click", openPlotBag);
     document.getElementById("plot-relocate-btn")?.addEventListener("click", relocatePlot);
+    document.getElementById("plot-ascend-btn")?.addEventListener("click", () => {
+      if (selectedPlotId && typeof PlotAscension !== "undefined") {
+        document.getElementById("plot-modal")?.classList.add("hidden");
+        PlotAscension.openForge(selectedPlotId);
+      }
+    });
 
     // Debounced renders prevent lag during rapid zoom/orbit gestures
     map.on("moveend zoomend", scheduleRender);
@@ -1099,5 +1320,5 @@ const Grid = (() => {
     scheduleRender();
   }
 
-  return { init, render, promptBuyTile, executeBuy, getAllPlots, setBuyMode, setGlobalPlot, setPlayerPosition, getPlayerPosition };
+  return { init, render, promptBuyTile, executeBuy, getAllPlots, setBuyMode, setAscensionMode, getAscensionSelections, setAscensionSelections, getMap, projectTid, setGlobalPlot, setPlayerPosition, getPlayerPosition };
 })();

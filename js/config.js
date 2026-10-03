@@ -122,6 +122,15 @@ const CONFIG = {
     { key: "epic",      label: "Epic",      rate: 0.0000000022, weight: 15, color: "#a86ee0" }, // 15%
     { key: "legendary", label: "Legendary", rate: 0.0000000044, weight: 5,  color: "#e0a84f" }, // 5%
   ],
+
+  // --- Plot Ascension Forge (3 same-rarity plots → 1 next-rarity plot) ---
+  // Sacrifices are permanently destroyed; target plot upgrades in place.
+  PLOT_ASCENSION: {
+    common:    { next: "rare",      count: 3, eb: 50,  cashRequired: 0.25 },
+    rare:      { next: "epic",      count: 3, eb: 100, cashRequired: 0.75 },
+    epic:      { next: "legendary", count: 3, eb: 150, cashRequired: 1.25 },
+  },
+
   
   // --- Elden Stops (Dyson Disc Beacons) ---
   ELDEN_STOP_GROWTH_MS: 30 * 60 * 1000,         // 30-minute construction phase before spin-ready

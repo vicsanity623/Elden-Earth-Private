@@ -3443,6 +3443,9 @@
       }
     });
     el("land-btn").addEventListener("click", () => { updateLandModal(); openModal("land-modal"); });
+    el("ascension-forge-btn")?.addEventListener("click", () => {
+      if (typeof PlotAscension !== "undefined") PlotAscension.openForge(null);
+    });
 
     // --- Tutorial Unread Alert Dot Logic ---
     const menuDot = el("menu-unread-dot");
@@ -4129,6 +4132,7 @@
 
   // Expose for leaderboard cross-module access
   window.updatePlayerInfoModal = updatePlayerInfoModal;
+  window.updateLandModal = updateLandModal;
   window.openModal = openModal;
   window.getPlayerPosition = () => currentPos ? { lat: currentPos.lat, lon: currentPos.lon } : null;
 

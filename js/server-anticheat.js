@@ -116,6 +116,18 @@ const ServerAntiCheat = (() => {
     }
   }
 
+  async function ascendPlot(payload) {
+    if (!functions) return { ok: false, reason: "functions_not_initialized" };
+    try {
+      const fn = functions.httpsCallable("ascendPlot");
+      const result = await fn(payload || {});
+      return result.data;
+    } catch (e) {
+      console.warn("[ServerAntiCheat] Plot ascension failed:", e.message);
+      return { ok: false, reason: "server_error" };
+    }
+  }
+
   async function spinWheel(multiplier = 1) {
     if (!functions) return { spun: false, reason: "functions_not_initialized" };
     try {
@@ -353,5 +365,5 @@ const ServerAntiCheat = (() => {
     }
   }
 
-  return { init, sendPosition, validatePurchase, validateCollect, relocatePlot, pickupPlot, spinWheel, activateBoost, claimBoost, recallCitadel, conquerCitadel, spawnDiamonds, citadelAction, claimQuestReward, collectExtractor, claimReferralBonuses, claimReferralRoyalties, isReady, fixAllPlotData, reconcilePlotData, fixTerritoryNames, claimMailbox, claimWeeklyPool, plantEldenStop, spinEldenStop, checkChatEligibility, validateUsername, filterChatMessage };
+  return { init, sendPosition, validatePurchase, validateCollect, relocatePlot, pickupPlot, ascendPlot, spinWheel, activateBoost, claimBoost, recallCitadel, conquerCitadel, spawnDiamonds, citadelAction, claimQuestReward, collectExtractor, claimReferralBonuses, claimReferralRoyalties, isReady, fixAllPlotData, reconcilePlotData, fixTerritoryNames, claimMailbox, claimWeeklyPool, plantEldenStop, spinEldenStop, checkChatEligibility, validateUsername, filterChatMessage };
 })();
